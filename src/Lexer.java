@@ -64,6 +64,10 @@ public class Lexer {
         StringBuilder sb = new StringBuilder();
         do {
             sb.append(source.charAt(curPos++));
+            if (source.charAt(curPos) == '\\') {
+                sb.append(source.charAt(curPos++));
+                sb.append(source.charAt(curPos++));
+            }
         } while (curPos < source.length() && source.charAt(curPos) != '\"');
         if (curPos < source.length() && source.charAt(curPos) == '\"') {
             sb.append(source.charAt(curPos++));
@@ -75,6 +79,10 @@ public class Lexer {
         StringBuilder sb = new StringBuilder();
         do {
             sb.append(source.charAt(curPos++));
+            if (source.charAt(curPos) == '\\') {
+                sb.append(source.charAt(curPos++));
+                sb.append(source.charAt(curPos++));
+            }
         } while (curPos < source.length() && source.charAt(curPos) != '\'');
         if (curPos < source.length() && source.charAt(curPos) == '\'') {
             sb.append(source.charAt(curPos++));
@@ -86,7 +94,8 @@ public class Lexer {
         StringBuilder sb = new StringBuilder();
         do {
             sb.append(source.charAt(curPos++));
-        } while (curPos < source.length() && Character.isLetterOrDigit(source.charAt(curPos)));
+        } while (curPos < source.length() &&
+                (Character.isLetterOrDigit(source.charAt(curPos)) || source.charAt(curPos) == '_'));
 
         if (TokenType.isReservedWord(sb.toString())) {
             curToken = new Token(TokenType.getReservedType(sb.toString()), sb.toString());
@@ -105,6 +114,7 @@ public class Lexer {
 
 
     public void next() {
+        curToken = null;
         while (curPos < source.length()) {
             char ch = source.charAt(curPos);
             // StringConst
@@ -141,6 +151,10 @@ public class Lexer {
                     char nextCh = source.charAt(curPos + 1);
                     if (nextCh == '/' || nextCh == '*') {
                         handleComment();
+                    } else {
+                        curToken = new Token(TokenType.DIV, "/");
+                        curPos++;
+                        break;
                     }
                 }
                 // Operators
@@ -152,7 +166,9 @@ public class Lexer {
         }
     }
 
-    public ArrayList<String> getErrorLog() {return errorLog;}
+    public ArrayList<String> getErrorLog() {
+        return errorLog;
+    }
 
     private void getOperator() {
         if (curPos + 1 < source.length()) {
@@ -168,6 +184,7 @@ public class Lexer {
             curPos++;
             curToken = new Token(TokenType.getOperator(op), op);
         } else {
+            System.out.println(curPos + " " + source.charAt(curPos));
             curPos++;
             errorLog.add((lineNum + 1) + " " + "a");
         }

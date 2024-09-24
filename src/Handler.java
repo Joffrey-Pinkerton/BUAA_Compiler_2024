@@ -28,7 +28,7 @@ public class Handler {
         } else {
             printErrors(lexer.getErrorLog());
         }
-        
+
         return tokens;
     }
 

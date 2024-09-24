@@ -3,10 +3,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-public class Main {
-
+public class Compiler {
     public static void main(String[] args) {
-        String filePath = "source.txt";
+        String filePath = "testfile.txt";
 
         try {
             byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
@@ -15,8 +14,6 @@ public class Main {
             Lexer lexer = new Lexer(content);
 
             ArrayList<Token> tokenList = new Handler(lexer).getTokenList();
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
