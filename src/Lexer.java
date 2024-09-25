@@ -10,7 +10,6 @@ public class Lexer {
 
     public Lexer(String source) {
         this.source = source;
-
         this.curPos = 0;
         this.lineNum = 0;
         this.curToken = null;
@@ -32,7 +31,7 @@ public class Lexer {
             do {
                 curPos++;
             } while (curPos < source.length() && source.charAt(curPos) != '\n');
-            if (source.charAt(curPos) == '\n') {
+            if (curPos < source.length() && source.charAt(curPos) == '\n') {
                 curPos++;
                 lineNum++;
                 // end of single-line comment
@@ -112,6 +111,25 @@ public class Lexer {
         curToken = new Token(TokenType.INTCON, sb.toString());
     }
 
+    private void getOperator() {
+        if (curPos + 1 < source.length()) {
+            String op = source.substring(curPos, curPos + 2);
+            if (TokenType.isOperator(op)) {
+                curPos += 2;
+                curToken = new Token(TokenType.getOperator(op), op);
+                return;
+            }
+        }
+        String op = String.valueOf(source.charAt(curPos));
+        if (TokenType.isOperator(op)) {
+            curPos++;
+            curToken = new Token(TokenType.getOperator(op), op);
+        } else {
+            curPos++;
+            errorLog.add((lineNum + 1) + " " + "a");
+        }
+    }
+
 
     public void next() {
         curToken = null;
@@ -168,26 +186,6 @@ public class Lexer {
 
     public ArrayList<String> getErrorLog() {
         return errorLog;
-    }
-
-    private void getOperator() {
-        if (curPos + 1 < source.length()) {
-            String op = source.substring(curPos, curPos + 2);
-            if (TokenType.isOperator(op)) {
-                curPos += 2;
-                curToken = new Token(TokenType.getOperator(op), op);
-                return;
-            }
-        }
-        String op = String.valueOf(source.charAt(curPos));
-        if (TokenType.isOperator(op)) {
-            curPos++;
-            curToken = new Token(TokenType.getOperator(op), op);
-        } else {
-            System.out.println(curPos + " " + source.charAt(curPos));
-            curPos++;
-            errorLog.add((lineNum + 1) + " " + "a");
-        }
     }
 }
 
