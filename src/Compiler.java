@@ -12,8 +12,7 @@ public class Compiler {
             String content = new String(fileBytes);
 
             Lexer lexer = new Lexer(content);
-
-            ArrayList<Token> tokenList = new Handler(lexer).getTokenList();
+            ArrayList<Token> tokenList = Handler.getTokenList(lexer);
         } catch (IOException e) {
             e.printStackTrace();
         }
