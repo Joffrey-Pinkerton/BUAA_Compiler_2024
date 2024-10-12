@@ -1,3 +1,5 @@
+import lexicon.Token;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -10,10 +12,8 @@ public class Compiler {
         try {
             byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
             String content = new String(fileBytes);
-
             Lexer lexer = new Lexer(content);
-
-            ArrayList<Token> tokenList = new Handler(lexer).getTokenList();
+            ArrayList<Token> tokenList = Handler.getTokenList(lexer);
         } catch (IOException e) {
             e.printStackTrace();
         }

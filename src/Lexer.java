@@ -1,3 +1,6 @@
+import lexicon.Token;
+import lexicon.TokenType;
+
 import java.util.ArrayList;
 
 public class Lexer {
@@ -15,7 +18,7 @@ public class Lexer {
         this.curToken = null;
     }
 
-    public Token getCurrentToken() {
+    public Token peek() {
         return curToken;
     }
 
@@ -186,6 +189,41 @@ public class Lexer {
 
     public ArrayList<String> getErrorLog() {
         return errorLog;
+    }
+
+    public boolean lookCurrent(TokenType type) {
+        return curToken.getType().equals(type);
+    }
+
+    public boolean lookAhead(TokenType type) {
+        int pos = curPos;
+        int line = lineNum;
+        Token token = curToken;
+
+        next();
+
+        Token nextToken = curToken;
+        curPos = pos;
+        lineNum = line;
+        curToken = token;
+
+        return nextToken.getType().equals(type);
+    }
+
+    public boolean lookDoubleAhead(TokenType type) {
+        int pos = curPos;
+        int line = lineNum;
+        Token token = curToken;
+
+        next();
+        next();
+
+        Token next2Token = curToken;
+        curPos = pos;
+        lineNum = line;
+        curToken = token;
+
+        return next2Token.getType().equals(type);
     }
 }
 

@@ -1,4 +1,8 @@
-public class Token {
+package lexicon;
+
+import syntax.Unit;
+
+public class Token implements Unit {
     private final TokenType type;
     private final String value;
 

@@ -1,0 +1,25 @@
+package syntax;
+
+// ConstDef → Ident [ '[' ConstExp ']' ] '=' ConstInitVal // k
+public class ConstDef implements Unit{
+    private final String ident;
+    private final ConstExp constExp;
+    private final ConstInitVal constInitVal;
+
+    public ConstDef(String ident, ConstExp constExp, ConstInitVal constInitVal) {
+        this.ident = ident;
+        this.constExp = constExp;
+        this.constInitVal = constInitVal;
+    }
+
+    public ConstDef(String ident, ConstInitVal constInitVal) {
+        this.ident = ident;
+        this.constExp = null;
+        this.constInitVal = constInitVal;
+    }
+
+    public String toString() {
+        return ident + (constExp == null ? "" : "[" + constExp + "]") + " = " + constInitVal;
+    }
+
+}
