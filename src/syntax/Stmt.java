@@ -31,7 +31,7 @@ public class Stmt implements Unit {
         switch (type) {
             case EMPTY:
                 return ";";
-            case AISSGN:
+            case ASSIGN:
                 return /*(LVal)*/ (keyParts.get(0)) + " = " + /*(Exp)*/ (keyParts.get(1)) + ";";
             case EXPR:
                 return /*(Exp)*/ keyParts.get(0) + ";";

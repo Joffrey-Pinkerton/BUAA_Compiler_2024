@@ -10,27 +10,6 @@ public class Handler {
     private static final Stack<String> outputStack = new Stack<>();
     private static final ArrayList<String> errorList = new ArrayList<>();
 
-    public static ArrayList<Token> getTokenList(Lexer lexer) {
-        ArrayList<Token> tokens = new ArrayList<>();
-
-        while (lexer.notEnd()) {
-            lexer.next();
-            Token curToken = lexer.peek();
-            if (curToken == null) {
-                break;
-            }
-            tokens.add(curToken);
-        }
-
-        if (errorList.isEmpty()) {
-            printInfo(tokens);
-        } else {
-            printErrors(errorList);
-        }
-
-        return tokens;
-    }
-
     public static void pushOutput(String str) {
         outputStack.push(str);
     }
@@ -43,21 +22,20 @@ public class Handler {
         errorList.add(error);
     }
 
-
-    public static ArrayList<String> getOutput(Parser parser) {
-        ArrayList<String> output = new ArrayList<>();
-
-        parser.parseCompUnit();
-
-        return output;
+    public static void print() {
+        if (!errorList.isEmpty()) {
+            printErrors();
+        } else {
+            printInfos();
+        }
     }
 
 
-    private static void printInfo(ArrayList<Token> tokenList) {
+    private static void printInfos() {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter("lexer.txt"));
-            for (Token token : tokenList) {
-                bw.write(token.getType() + " " + token + "\n");
+            for (String str : outputStack) {
+                bw.write(str + "\n");
             }
             bw.flush();
             bw.close();
@@ -66,10 +44,10 @@ public class Handler {
         }
     }
 
-    private static void printErrors(ArrayList<String> errors) {
+    private static void printErrors() {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter("error.txt"));
-            for (String error : errors) {
+            for (String error : errorList) {
                 bw.write(error + "\n");
             }
             bw.flush();

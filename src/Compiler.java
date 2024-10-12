@@ -13,7 +13,9 @@ public class Compiler {
             byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
             String content = new String(fileBytes);
             Lexer lexer = new Lexer(content);
-            ArrayList<Token> tokenList = Handler.getTokenList(lexer);
+            Parser parser = new Parser(lexer);
+            parser.parseCompUnit();
+            Handler.print();
         } catch (IOException e) {
             e.printStackTrace();
         }

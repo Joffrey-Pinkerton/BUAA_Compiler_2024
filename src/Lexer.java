@@ -12,6 +12,8 @@ public class Lexer {
         this.curPos = 0;
         this.lineNum = 0;
         this.curToken = null;
+
+        this.next();
     }
 
     public Token peek() {
@@ -125,7 +127,7 @@ public class Lexer {
             curToken = new Token(TokenType.getOperator(op), op);
         } else {
             curPos++;
-            Handler.addErrorInfo((lineNum + 1) + " " + "a" + "\n");
+            Handler.addErrorInfo((lineNum + 1) + " " + "a");
         }
     }
 
@@ -181,7 +183,9 @@ public class Lexer {
                 }
             }
         }
-        Handler.pushOutput(curToken.getType() + " " + curToken + "\n");
+        if (curToken != null) {
+            Handler.pushOutput(curToken.getType() + " " + curToken);
+        }
     }
 
     public boolean lookCurrent(TokenType type) {

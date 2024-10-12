@@ -28,14 +28,14 @@ public class Parser {
         }
         MainFuncDef mainFuncDef = parseMainFuncDef();
 
-        Handler.pushOutput("<CompUnit>\n");
+        Handler.pushOutput("<CompUnit>");
         return new CompUnit(decls, funcDefs, mainFuncDef);
     }
 
     public Decl parseDecl() {
         // Decl → ConstDecl | VarDecl
         Decl decl = lexer.lookCurrent(TokenType.CONSTTK) ? new Decl(parseConstDecl()) : new Decl(parseVarDecl());
-        Handler.pushOutput(decl.toString());
+        Handler.pushOutput("<Decl>");
         return decl;
     }
 
@@ -57,20 +57,19 @@ public class Parser {
             throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
         }
         lexer.next();
+        Handler.pushOutput("<ConstDecl>");
         return new ConstDecl(bType, constDefs);
     }
 
     public BType parseBType() {
         // BType → 'int' | 'char'
-        if (lexer.lookCurrent(TokenType.INTTK)) {
-            lexer.next();
-            return new BType("int");
-        } else if (lexer.lookCurrent(TokenType.CHARTK)) {
-            lexer.next();
-            return new BType("char");
-        } else {
+        if (!lexer.lookCurrent(TokenType.INTTK) && !lexer.lookCurrent(TokenType.CHARTK)) {
             throw new SyntaxErrorException("Expect 'int' or 'char', but get " + lexer.peek());
         }
+        String bType = lexer.lookCurrent(TokenType.INTTK) ? "int" : "char";
+        lexer.next();
+        Handler.pushOutput("<BType>");
+        return new BType(bType);
     }
 
     public ConstDef parseConstDef() {
@@ -96,7 +95,10 @@ public class Parser {
             throw new SyntaxErrorException("Expect '=', but get " + lexer.peek());
         }
         lexer.next();
-        return isArray ? new ConstDef(ident, constExp, parseConstInitVal()) : new ConstDef(ident, parseConstInitVal());
+        ConstInitVal constInitVal = parseConstInitVal();
+
+        Handler.pushOutput("<ConstDef>");
+        return isArray ? new ConstDef(ident, constExp, constInitVal) : new ConstDef(ident, constInitVal);
     }
 
     public ConstInitVal parseConstInitVal() {
@@ -104,6 +106,7 @@ public class Parser {
         if (lexer.lookCurrent(TokenType.STRCON)) {
             String str = lexer.peek().getValue();
             lexer.next();
+            Handler.pushOutput("<ConstInitVal>");
             return new ConstInitVal(str);
         } else if (lexer.lookCurrent(TokenType.LBRACE)) {
             lexer.next();
@@ -121,9 +124,12 @@ public class Parser {
                 throw new SyntaxErrorException("Expect '}', but get " + lexer.peek());
             }
             lexer.next();
+            Handler.pushOutput("<ConstInitVal>");
             return new ConstInitVal(constExps);
         } else {
-            return new ConstInitVal(parseConstExp());
+            ConstExp constExp = parseConstExp();
+            Handler.pushOutput("<ConstInitVal>");
+            return new ConstInitVal(constExp);
         }
     }
 
@@ -140,6 +146,7 @@ public class Parser {
             throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
         }
         lexer.next();
+        Handler.pushOutput("<VarDecl>");
         return new VarDecl(bType, varDefs);
     }
 
@@ -162,8 +169,11 @@ public class Parser {
         }
         if (lexer.lookCurrent(TokenType.ASSIGN)) {
             lexer.next();
-            return new VarDef(ident, constExp, parseInitVal());
+            InitVal initVal = parseInitVal();
+            Handler.pushOutput("<VarDef>");
+            return new VarDef(ident, constExp, initVal);
         } else {
+            Handler.pushOutput("<VarDef>");
             return new VarDef(ident, constExp);
         }
     }
@@ -173,11 +183,13 @@ public class Parser {
         if (lexer.lookCurrent(TokenType.STRCON)) {
             String str = lexer.peek().getValue();
             lexer.next();
+            Handler.pushOutput("<InitVal>");
             return new InitVal(str);
         } else if (lexer.lookCurrent(TokenType.LBRACE)) {
             lexer.next();
             if (lexer.lookCurrent(TokenType.RBRACE)) {
                 lexer.next();
+                Handler.pushOutput("<InitVal>");
                 return new InitVal(new ArrayList<>());
             }
             ArrayList<Exp> exps = new ArrayList<>();
@@ -190,9 +202,12 @@ public class Parser {
                 throw new SyntaxErrorException("Expect '}', but get " + lexer.peek());
             }
             lexer.next();
+            Handler.pushOutput("<InitVal>");
             return new InitVal(exps);
         } else {
-            return new InitVal(parseExp());
+            Exp exp = parseExp();
+            Handler.pushOutput("<InitVal>");
+            return new InitVal(exp);
         }
     }
 
@@ -215,23 +230,19 @@ public class Parser {
         }
         lexer.next();
         Block block = parseBlock();
+        Handler.pushOutput("<FuncDef>");
         return new FuncDef(funcType, funcName, funcFParams, block);
     }
 
     public FuncType parseFuncType() {
         // FuncType → 'void' | 'int' | 'char'
-        if (lexer.lookCurrent(TokenType.INTTK)) {
-            lexer.next();
-            return new FuncType("int");
-        } else if (lexer.lookCurrent(TokenType.CHARTK)) {
-            lexer.next();
-            return new FuncType("char");
-        } else if (lexer.lookCurrent(TokenType.VOIDTK)) {
-            lexer.next();
-            return new FuncType("void");
-        } else {
-            throw new SyntaxErrorException("Expect 'int' or 'char', but get " + lexer.peek());
+        if (!lexer.lookCurrent(TokenType.INTTK) && !lexer.lookCurrent(TokenType.CHARTK) && !lexer.lookCurrent(TokenType.VOIDTK)) {
+            throw new SyntaxErrorException("Expect 'int', 'char', or 'void', but get " + lexer.peek());
         }
+        String funcType = lexer.lookCurrent(TokenType.INTTK) ? "int" : lexer.lookCurrent(TokenType.CHARTK) ? "char" : "void";
+        lexer.next();
+        Handler.pushOutput("<FuncType>");
+        return new FuncType(funcType);
     }
 
     public MainFuncDef parseMainFuncDef() {
@@ -254,6 +265,7 @@ public class Parser {
         }
         lexer.next();
         Block block = parseBlock();
+        Handler.pushOutput("<MainFuncDef>");
         return new MainFuncDef(block);
     }
 
@@ -267,6 +279,7 @@ public class Parser {
             lexer.next();
             funcFParams.add(parseFuncFParam());
         }
+        Handler.pushOutput("<FuncFParams>");
         return new FuncFParams(funcFParams);
     }
 
@@ -288,6 +301,7 @@ public class Parser {
             }
             lexer.next();
         }
+        Handler.pushOutput("<FuncFParam>");
         return new FuncFParam(bType, ident, isArray);
     }
 
@@ -302,14 +316,19 @@ public class Parser {
             blockItems.add(parseBlockItem());
         }
         lexer.next();
+        Handler.pushOutput("<Block>");
         return new Block(blockItems);
     }
 
     public BlockItem parseBlockItem() {
         // BlockItem → Decl | Stmt
         if (lexer.lookCurrent(TokenType.CONSTTK) || (lexer.lookCurrent(TokenType.INTTK) || lexer.lookCurrent(TokenType.CHARTK))) {
-            return new BlockItem(parseDecl());
+            Decl decl = parseDecl();
+            Handler.pushOutput("<BlockItem>");
+            return new BlockItem(decl);
         } else {
+            Stmt stmt = parseStmt();
+            Handler.pushOutput("<BlockItem>");
             return new BlockItem(parseStmt());
         }
     }
@@ -335,6 +354,7 @@ public class Parser {
             Stmt elseStmt = parseStmt();
             units.add(elseStmt);
         }
+        Handler.pushOutput("<Stmt>");
         return new Stmt(StmtType.IF, units);
     }
 
@@ -383,6 +403,7 @@ public class Parser {
         }
         Stmt stmt = parseStmt();
         units.add(stmt);
+        Handler.pushOutput("<Stmt>");
         return new Stmt(StmtType.FOR, units);
     }
 
@@ -469,8 +490,10 @@ public class Parser {
     }
 
     private Stmt parseStmtBlock() {
+        Block block = parseBlock();
+        Handler.pushOutput("<Stmt>");
         return new Stmt(StmtType.BLOCK, new ArrayList<>() {{
-            add(parseBlock());
+            add(block);
         }});
     }
 
@@ -478,6 +501,7 @@ public class Parser {
         lexer.next();
         if (lexer.lookCurrent(TokenType.SEMICN)) {
             lexer.next();
+            Handler.pushOutput("<Stmt>");
             return new Stmt(StmtType.RETURN);
         } else {
             ArrayList<Unit> units = new ArrayList<>();
@@ -486,6 +510,7 @@ public class Parser {
                 throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
             }
             lexer.next();
+            Handler.pushOutput("<Stmt>");
             return new Stmt(StmtType.RETURN, units);
         }
     }
@@ -496,6 +521,7 @@ public class Parser {
             throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
         }
         lexer.next();
+        Handler.pushOutput("<Stmt>");
         return new Stmt(StmtType.BREAK);
     }
 
@@ -505,11 +531,13 @@ public class Parser {
             throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
         }
         lexer.next();
+        Handler.pushOutput("<Stmt>");
         return new Stmt(StmtType.CONTINUE);
     }
 
     private Stmt parseStmtEmpty() {
         lexer.next();
+        Handler.pushOutput("<Stmt>");
         return new Stmt(StmtType.EMPTY);
     }
 
@@ -545,17 +573,22 @@ public class Parser {
         }
         lexer.next();
         Exp exp = parseExp();
+        Handler.pushOutput("<ForStmt>");
         return new ForStmt(lVal, exp);
     }
 
     public Exp parseExp() {
         // Exp → AddExp
-        return new Exp(parseAddExp());
+        AddExp addExp = parseAddExp();
+        Handler.pushOutput("<Exp>");
+        return new Exp(addExp);
     }
 
     public Cond parseCond() {
         // Cond → LOrExp
-        return new Cond(parseLOrExp());
+        LOrExp lOrExp = parseLOrExp();
+        Handler.pushOutput("<Cond>");
+        return new Cond(lOrExp);
     }
 
     public LVal parseLVal() {
@@ -572,8 +605,10 @@ public class Parser {
                 throw new SyntaxErrorException("Expect ']', but get " + lexer.peek());
             }
             lexer.next();
+            Handler.pushOutput("<LVal>");
             return new LVal(ident, exp);
         } else {
+            Handler.pushOutput("<LVal>");
             return new LVal(ident);
         }
     }
@@ -587,13 +622,20 @@ public class Parser {
                 throw new SyntaxErrorException("Expect ')', but get " + lexer.peek());
             }
             lexer.next();
+            Handler.pushOutput("<PrimaryExp>");
             return new PrimaryExp(exp);
         } else if (lexer.lookCurrent(TokenType.INTCON)) {
-            return new PrimaryExp(parseNumber());
+            Num number = parseNumber();
+            Handler.pushOutput("<PrimaryExp>");
+            return new PrimaryExp(number);
         } else if (lexer.lookCurrent(TokenType.CHRCON)) {
-            return new PrimaryExp(parseCharacter());
+            Char character = parseCharacter();
+            Handler.pushOutput("<PrimaryExp>");
+            return new PrimaryExp(character);
         } else {
-            return new PrimaryExp(parseLVal());
+            LVal lVal = parseLVal();
+            Handler.pushOutput("<PrimaryExp>");
+            return new PrimaryExp(lVal);
         }
     }
 
@@ -601,6 +643,7 @@ public class Parser {
         if (lexer.lookCurrent(TokenType.INTCON)) {
             String intConst = lexer.peek().getValue();
             lexer.next();
+            Handler.pushOutput("<Number>");
             return new Num(intConst);
         } else {
             throw new SyntaxErrorException("Expect an integer constant, but get " + lexer.peek());
@@ -611,6 +654,7 @@ public class Parser {
         if (lexer.lookCurrent(TokenType.CHRCON)) {
             char charConst = lexer.peek().getValue().charAt(0);
             lexer.next();
+            Handler.pushOutput("<Character>");
             return new Char(charConst);
         } else {
             throw new SyntaxErrorException("Expect a character constant, but get " + lexer.peek());
@@ -625,6 +669,7 @@ public class Parser {
             lexer.next();
             if (lexer.lookCurrent(TokenType.RPARENT)) {
                 lexer.next();
+                Handler.pushOutput("<UnaryExp>");
                 return new UnaryExp(ident, null);
             }
             FuncRParams funcRParams = parseFuncRParams();
@@ -632,12 +677,15 @@ public class Parser {
                 throw new SyntaxErrorException("Expect ')', but get " + lexer.peek());
             }
             lexer.next();
+            Handler.pushOutput("<UnaryExp>");
             return new UnaryExp(ident, funcRParams);
         } else if (lexer.lookCurrent(TokenType.PLUS) || lexer.lookCurrent(TokenType.MINU) || lexer.lookCurrent(TokenType.NOT)) {
             UnaryOp unaryOp = parseUnaryOp();
             UnaryExp unaryExp = parseUnaryExp();
+            Handler.pushOutput("<UnaryExp>");
             return new UnaryExp(unaryOp, unaryExp);
         } else {
+            Handler.pushOutput("<UnaryExp>");
             return new UnaryExp(parsePrimaryExp());
         }
     }
@@ -646,6 +694,7 @@ public class Parser {
         // UnaryOp → '+' | '−' | '!'
         if (lexer.lookCurrent(TokenType.PLUS) || lexer.lookCurrent(TokenType.MINU) || lexer.lookCurrent(TokenType.NOT)) {
             lexer.next();
+            Handler.pushOutput("<UnaryOp>");
             return new UnaryOp(lexer.peek().getValue());
         } else {
             throw new SyntaxErrorException("Expect '+', '-', or '!', but get " + lexer.peek());
@@ -660,6 +709,7 @@ public class Parser {
             lexer.next();
             exps.add(parseExp());
         }
+        Handler.pushOutput("<FuncRParams>");
         return new FuncRParams(exps);
     }
 
@@ -674,6 +724,7 @@ public class Parser {
             lexer.next();
             unaryExps.add(parseUnaryExp());
         }
+        Handler.pushOutput("<MulExp>");
         return new MulExp(unaryExps, ops);
     }
 
@@ -688,6 +739,7 @@ public class Parser {
             lexer.next();
             mulExps.add(parseMulExp());
         }
+        Handler.pushOutput("<AddExp>");
         return new AddExp(mulExps, ops);
     }
 
@@ -703,6 +755,7 @@ public class Parser {
             lexer.next();
             addExps.add(parseAddExp());
         }
+        Handler.pushOutput("<RelExp>");
         return new RelExp(addExps, ops);
 
     }
@@ -718,6 +771,7 @@ public class Parser {
             lexer.next();
             relExps.add(parseRelExp());
         }
+        Handler.pushOutput("<EqExp>");
         return new EqExp(relExps, ops);
     }
 
@@ -729,6 +783,7 @@ public class Parser {
             lexer.next();
             eqExps.add(parseEqExp());
         }
+        Handler.pushOutput("<LAndExp>");
         return new LAndExp(eqExps);
     }
 
@@ -740,11 +795,13 @@ public class Parser {
             lexer.next();
             lAndExps.add(parseLAndExp());
         }
+        Handler.pushOutput("<LOrExp>");
         return new LOrExp(lAndExps);
     }
 
     public ConstExp parseConstExp() {
         // ConstExp → AddExp [note: Ident used must be constant]
+        Handler.pushOutput("<ConstExp>");
         return new ConstExp(parseAddExp());
     }
 }
