@@ -33,7 +33,7 @@ public class Handler {
 
     private static void printInfos() {
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("lexer.txt"));
+            BufferedWriter bw = new BufferedWriter(new FileWriter("parser.txt"));
             for (String str : outputStack) {
                 bw.write(str + "\n");
             }

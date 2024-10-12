@@ -3,6 +3,7 @@ import lexicon.Token;
 import lexicon.TokenType;
 import syntax.*;
 
+import javax.print.attribute.HashDocAttributeSet;
 import java.util.ArrayList;
 
 public class Parser {
@@ -19,7 +20,8 @@ public class Parser {
 
         while (lexer.lookCurrent(TokenType.CONSTTK)
                 || (lexer.lookCurrent(TokenType.INTTK) || lexer.lookCurrent(TokenType.CHARTK))
-                && lexer.lookAhead(TokenType.IDENFR) && lexer.lookDoubleAhead(TokenType.ASSIGN)) {
+                && lexer.lookAhead(TokenType.IDENFR) &&
+                (lexer.lookDoubleAhead(TokenType.ASSIGN) || lexer.lookDoubleAhead(TokenType.LBRACK))) {
             decls.add(parseDecl());
         }
         while ((lexer.lookCurrent(TokenType.INTTK) || lexer.lookCurrent(TokenType.CHARTK)
@@ -35,7 +37,6 @@ public class Parser {
     public Decl parseDecl() {
         // Decl → ConstDecl | VarDecl
         Decl decl = lexer.lookCurrent(TokenType.CONSTTK) ? new Decl(parseConstDecl()) : new Decl(parseVarDecl());
-        Handler.pushOutput("<Decl>");
         return decl;
     }
 
@@ -63,13 +64,15 @@ public class Parser {
 
     public BType parseBType() {
         // BType → 'int' | 'char'
-        if (!lexer.lookCurrent(TokenType.INTTK) && !lexer.lookCurrent(TokenType.CHARTK)) {
+        if (lexer.lookCurrent(TokenType.INTTK)) {
+            lexer.next();
+            return new BType("int");
+        } else if (lexer.lookCurrent(TokenType.CHARTK)) {
+            lexer.next();
+            return new BType("char");
+        } else {
             throw new SyntaxErrorException("Expect 'int' or 'char', but get " + lexer.peek());
         }
-        String bType = lexer.lookCurrent(TokenType.INTTK) ? "int" : "char";
-        lexer.next();
-        Handler.pushOutput("<BType>");
-        return new BType(bType);
     }
 
     public ConstDef parseConstDef() {
@@ -142,6 +145,7 @@ public class Parser {
             lexer.next();
             varDefs.add(parseVarDef());
         }
+
         if (!lexer.lookCurrent(TokenType.SEMICN)) {
             throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
         }
@@ -218,12 +222,18 @@ public class Parser {
             throw new SyntaxErrorException("Expect an identifier, but get " + lexer.peek());
         }
         String funcName = lexer.peek().getValue();
-
         lexer.next();
+
         if (!lexer.lookCurrent(TokenType.LPARENT)) {
             throw new SyntaxErrorException("Expect '(', but get " + lexer.peek());
         }
         lexer.next();
+        if (lexer.lookCurrent(TokenType.RPARENT)) {
+            lexer.next();
+            Block block = parseBlock();
+            Handler.pushOutput("<FuncDef>");
+            return new FuncDef(funcType, funcName, new FuncFParams(new ArrayList<>()), block);
+        }
         FuncFParams funcFParams = parseFuncFParams();
         if (!lexer.lookCurrent(TokenType.RPARENT)) {
             throw new SyntaxErrorException("Expect ')', but get " + lexer.peek());
@@ -324,12 +334,10 @@ public class Parser {
         // BlockItem → Decl | Stmt
         if (lexer.lookCurrent(TokenType.CONSTTK) || (lexer.lookCurrent(TokenType.INTTK) || lexer.lookCurrent(TokenType.CHARTK))) {
             Decl decl = parseDecl();
-            Handler.pushOutput("<BlockItem>");
             return new BlockItem(decl);
         } else {
             Stmt stmt = parseStmt();
-            Handler.pushOutput("<BlockItem>");
-            return new BlockItem(parseStmt());
+            return new BlockItem(stmt);
         }
     }
 
@@ -432,6 +440,7 @@ public class Parser {
             throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
         }
         lexer.next();
+        Handler.pushOutput("<Stmt>");
         return new Stmt(StmtType.PRINTF, units);
     }
 
@@ -446,6 +455,7 @@ public class Parser {
             units.add(parseExp());
             if (lexer.lookCurrent(TokenType.SEMICN)) {
                 lexer.next();
+                Handler.pushOutput("<Stmt>");
                 return new Stmt(StmtType.EXPR, new ArrayList<>(units));
             } else {
                 throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
@@ -453,9 +463,11 @@ public class Parser {
         } else {
             // definitely starts with LVal(could be EXPR as well!!!)
             LVal lVal = parseLVal();
+
             units.add(lVal);
             if (lexer.lookCurrent(TokenType.SEMICN)) { // EXPR
                 lexer.next();
+                Handler.pushOutput("<Stmt>");
                 return new Stmt(StmtType.EXPR, units);
             }
             if (!lexer.lookCurrent(TokenType.ASSIGN)) {
@@ -477,6 +489,7 @@ public class Parser {
                     throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
                 }
                 lexer.next();
+                Handler.pushOutput("<Stmt>");
                 return new Stmt(stmtType, units);
             } else { // ASSIGN
                 units.add(parseExp());
@@ -484,6 +497,7 @@ public class Parser {
                     throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
                 }
                 lexer.next();
+                Handler.pushOutput("<Stmt>");
                 return new Stmt(StmtType.ASSIGN, units);
             }
         }
@@ -685,8 +699,9 @@ public class Parser {
             Handler.pushOutput("<UnaryExp>");
             return new UnaryExp(unaryOp, unaryExp);
         } else {
+            PrimaryExp primaryExp = parsePrimaryExp();
             Handler.pushOutput("<UnaryExp>");
-            return new UnaryExp(parsePrimaryExp());
+            return new UnaryExp(primaryExp);
         }
     }
 
@@ -721,6 +736,7 @@ public class Parser {
         unaryExps.add(parseUnaryExp());
         while (lexer.lookCurrent(TokenType.MULT) || lexer.lookCurrent(TokenType.DIV) || lexer.lookCurrent(TokenType.MOD)) {
             ops.add(lexer.peek());
+            Handler.pushOutput("<MulExp>");
             lexer.next();
             unaryExps.add(parseUnaryExp());
         }
@@ -736,6 +752,7 @@ public class Parser {
         mulExps.add(parseMulExp());
         while (lexer.lookCurrent(TokenType.PLUS) || lexer.lookCurrent(TokenType.MINU)) {
             ops.add(lexer.peek());
+            Handler.pushOutput("<AddExp>");
             lexer.next();
             mulExps.add(parseMulExp());
         }
@@ -752,6 +769,7 @@ public class Parser {
         while (lexer.lookCurrent(TokenType.LSS) || lexer.lookCurrent(TokenType.LEQ) || lexer.lookCurrent(TokenType.GRE)
                 || lexer.lookCurrent(TokenType.GEQ)) {
             ops.add(lexer.peek());
+            Handler.pushOutput("<RelExp>");
             lexer.next();
             addExps.add(parseAddExp());
         }
@@ -768,6 +786,7 @@ public class Parser {
         relExps.add(parseRelExp());
         while (lexer.lookCurrent(TokenType.EQL) || lexer.lookCurrent(TokenType.NEQ)) {
             ops.add(lexer.peek());
+            Handler.pushOutput("<EqExp>");
             lexer.next();
             relExps.add(parseRelExp());
         }
@@ -780,6 +799,7 @@ public class Parser {
         ArrayList<EqExp> eqExps = new ArrayList<>();
         eqExps.add(parseEqExp());
         while (lexer.lookCurrent(TokenType.AND)) {
+            Handler.pushOutput("<LAndExp>");
             lexer.next();
             eqExps.add(parseEqExp());
         }
@@ -792,6 +812,7 @@ public class Parser {
         ArrayList<LAndExp> lAndExps = new ArrayList<>();
         lAndExps.add(parseLAndExp());
         while (lexer.lookCurrent(TokenType.OR)) {
+            Handler.pushOutput("<LOrExp>");
             lexer.next();
             lAndExps.add(parseLAndExp());
         }
@@ -801,8 +822,9 @@ public class Parser {
 
     public ConstExp parseConstExp() {
         // ConstExp → AddExp [note: Ident used must be constant]
+        AddExp addExp = parseAddExp();
         Handler.pushOutput("<ConstExp>");
-        return new ConstExp(parseAddExp());
+        return new ConstExp(addExp);
     }
 }
 

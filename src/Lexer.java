@@ -133,7 +133,9 @@ public class Lexer {
 
 
     public void next() {
-        curToken = null;
+        if (curToken != null) {
+            Handler.pushOutput(curToken.getType() + " " + curToken);
+        }
         while (curPos < source.length()) {
             char ch = source.charAt(curPos);
             // StringConst
@@ -182,9 +184,6 @@ public class Lexer {
                     break;
                 }
             }
-        }
-        if (curToken != null) {
-            Handler.pushOutput(curToken.getType() + " " + curToken);
         }
     }
 
