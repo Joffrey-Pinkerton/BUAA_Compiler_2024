@@ -26,16 +26,17 @@ public class Parser {
                 || lexer.lookCurrent(TokenType.VOIDTK)) && lexer.lookAhead(TokenType.IDENFR)) {
             funcDefs.add(parseFuncDef());
         }
-        return new CompUnit(decls, funcDefs, parseMainFuncDef());
+        MainFuncDef mainFuncDef = parseMainFuncDef();
+
+        Handler.pushOutput("<CompUnit>\n");
+        return new CompUnit(decls, funcDefs, mainFuncDef);
     }
 
     public Decl parseDecl() {
         // Decl → ConstDecl | VarDecl
-        if (lexer.lookCurrent(TokenType.CONSTTK)) {
-            return new Decl(parseConstDecl());
-        } else {
-            return new Decl(parseVarDecl());
-        }
+        Decl decl = lexer.lookCurrent(TokenType.CONSTTK) ? new Decl(parseConstDecl()) : new Decl(parseVarDecl());
+        Handler.pushOutput(decl.toString());
+        return decl;
     }
 
     public ConstDecl parseConstDecl() {
@@ -441,6 +442,7 @@ public class Parser {
             }
             lexer.next();
             if (lexer.lookCurrent(TokenType.GETINTTK) || lexer.lookCurrent(TokenType.GETCHARTK)) { // GETINT+GETCHAR
+                StmtType stmtType = lexer.lookCurrent(TokenType.GETINTTK) ? StmtType.GETINT : StmtType.GETCHAR;
                 lexer.next();
                 if (!lexer.lookCurrent(TokenType.LPARENT)) {
                     throw new SyntaxErrorException("Expect '(', but get " + lexer.peek());
@@ -454,7 +456,7 @@ public class Parser {
                     throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
                 }
                 lexer.next();
-                return new Stmt(lexer.lookCurrent(TokenType.GETINTTK) ? StmtType.GETINT : StmtType.GETCHAR, units);
+                return new Stmt(stmtType, units);
             } else { // ASSIGN
                 units.add(parseExp());
                 if (!lexer.lookCurrent(TokenType.SEMICN)) {
@@ -486,7 +488,6 @@ public class Parser {
             lexer.next();
             return new Stmt(StmtType.RETURN, units);
         }
-
     }
 
     private Stmt parseStmtBreak() {

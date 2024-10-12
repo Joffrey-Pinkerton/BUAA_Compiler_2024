@@ -1,15 +1,11 @@
 import lexicon.Token;
 import lexicon.TokenType;
 
-import java.util.ArrayList;
-
 public class Lexer {
     private final String source;
     private int curPos;
     private int lineNum;
     private Token curToken;
-
-    private final ArrayList<String> errorLog = new ArrayList<>();
 
     public Lexer(String source) {
         this.source = source;
@@ -129,7 +125,7 @@ public class Lexer {
             curToken = new Token(TokenType.getOperator(op), op);
         } else {
             curPos++;
-            errorLog.add((lineNum + 1) + " " + "a");
+            Handler.addErrorInfo((lineNum + 1) + " " + "a" + "\n");
         }
     }
 
@@ -185,10 +181,7 @@ public class Lexer {
                 }
             }
         }
-    }
-
-    public ArrayList<String> getErrorLog() {
-        return errorLog;
+        Handler.pushOutput(curToken.getType() + " " + curToken + "\n");
     }
 
     public boolean lookCurrent(TokenType type) {
@@ -207,6 +200,8 @@ public class Lexer {
         lineNum = line;
         curToken = token;
 
+        Handler.popOutput();
+
         return nextToken.getType().equals(type);
     }
 
@@ -222,6 +217,9 @@ public class Lexer {
         curPos = pos;
         lineNum = line;
         curToken = token;
+
+        Handler.popOutput();
+        Handler.popOutput();
 
         return next2Token.getType().equals(type);
     }
