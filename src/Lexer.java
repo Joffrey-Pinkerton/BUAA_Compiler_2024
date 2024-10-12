@@ -7,11 +7,19 @@ public class Lexer {
     private int lineNum;
     private Token curToken;
 
+    private int savePos;
+    private int saveLine;
+    private Token saveToken;
+
     public Lexer(String source) {
         this.source = source;
         this.curPos = 0;
         this.lineNum = 0;
         this.curToken = null;
+
+        this.savePos = 0;
+        this.saveLine = 0;
+        this.saveToken = null;
 
         this.next();
     }
@@ -225,6 +233,22 @@ public class Lexer {
         Handler.popOutput();
 
         return next2Token.getType().equals(type);
+    }
+
+    public void save() {
+        savePos = curPos;
+        saveLine = lineNum;
+        saveToken = curToken;
+
+    }
+
+    public void restore() {
+        curPos = savePos;
+        lineNum = saveLine;
+        curToken = saveToken;
+        if (curPos == 0) {
+            next();
+        }
     }
 }
 

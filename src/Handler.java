@@ -10,6 +10,9 @@ public class Handler {
     private static final Stack<String> outputStack = new Stack<>();
     private static final ArrayList<String> errorList = new ArrayList<>();
 
+    private static final Stack<String> saveOutputStack = new Stack<>();
+    private static final ArrayList<String> saveErrorList = new ArrayList<>();
+
     public static void pushOutput(String str) {
         outputStack.push(str);
     }
@@ -55,5 +58,21 @@ public class Handler {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void save() {
+        saveOutputStack.clear();
+        saveErrorList.clear();
+
+        saveOutputStack.addAll(outputStack);
+        saveErrorList.addAll(errorList);
+    }
+
+    public static void restore() {
+        outputStack.clear();
+        errorList.clear();
+
+        outputStack.addAll(saveOutputStack);
+        errorList.addAll(saveErrorList);
     }
 }

@@ -1,14 +1,14 @@
 package syntax;
 
 // Number → IntConst
-public class Num implements Unit{
-    public final int intConst;
+public class Num implements Unit {
+    public final String intConst;
 
     public Num(String intConstStr) {
-        this.intConst = Integer.parseInt(intConstStr);
+        this.intConst = intConstStr;
     }
 
     public String toString() {
-        return Integer.toString(intConst);
+        return intConst;
     }
 }

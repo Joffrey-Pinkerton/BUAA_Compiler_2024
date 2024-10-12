@@ -20,12 +20,11 @@ public class Parser {
 
         while (lexer.lookCurrent(TokenType.CONSTTK)
                 || (lexer.lookCurrent(TokenType.INTTK) || lexer.lookCurrent(TokenType.CHARTK))
-                && lexer.lookAhead(TokenType.IDENFR) &&
-                (lexer.lookDoubleAhead(TokenType.ASSIGN) || lexer.lookDoubleAhead(TokenType.LBRACK))) {
+                && lexer.lookAhead(TokenType.IDENFR) && !lexer.lookDoubleAhead(TokenType.LPARENT)) {
             decls.add(parseDecl());
         }
         while ((lexer.lookCurrent(TokenType.INTTK) || lexer.lookCurrent(TokenType.CHARTK)
-                || lexer.lookCurrent(TokenType.VOIDTK)) && lexer.lookAhead(TokenType.IDENFR)) {
+                || lexer.lookCurrent(TokenType.VOIDTK)) && lexer.lookAhead(TokenType.IDENFR) && lexer.lookDoubleAhead(TokenType.LPARENT)) {
             funcDefs.add(parseFuncDef());
         }
         MainFuncDef mainFuncDef = parseMainFuncDef();
@@ -460,16 +459,27 @@ public class Parser {
             } else {
                 throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
             }
-        } else {
-            // definitely starts with LVal(could be EXPR as well!!!)
-            LVal lVal = parseLVal();
+        }
 
-            units.add(lVal);
-            if (lexer.lookCurrent(TokenType.SEMICN)) { // EXPR
-                lexer.next();
-                Handler.pushOutput("<Stmt>");
-                return new Stmt(StmtType.EXPR, units);
+        try {
+            lexer.save();
+            Handler.save();
+
+            Exp exp = parseExp();
+            units.add(exp);
+            if (!lexer.lookCurrent(TokenType.SEMICN)) {
+                throw new SyntaxErrorException("Expect ';', but get " + lexer.peek());
             }
+            lexer.next();
+            Handler.pushOutput("<Stmt>");
+            return new Stmt(StmtType.EXPR, units);
+        } catch (SyntaxErrorException e) {
+            lexer.restore();
+            Handler.restore();
+            units.clear();
+
+            LVal lVal = parseLVal();
+            units.add(lVal);
             if (!lexer.lookCurrent(TokenType.ASSIGN)) {
                 throw new SyntaxErrorException("Expect '=', but get " + lexer.peek());
             }
@@ -500,8 +510,11 @@ public class Parser {
                 Handler.pushOutput("<Stmt>");
                 return new Stmt(StmtType.ASSIGN, units);
             }
+
         }
+
     }
+
 
     private Stmt parseStmtBlock() {
         Block block = parseBlock();
