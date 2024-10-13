@@ -35,3 +35,4 @@ bin/
 **/*.json
 **/test
 **/*.jar
+**/META-INF
