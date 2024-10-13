@@ -1,25 +1,32 @@
+import exceptions.UnexpectedErrorException;
+import exceptions.UnrecognizedTokenException;
 import lexicon.Token;
 import lexicon.TokenType;
+import output.Handler;
 
 public class Lexer {
     private final String source;
     private int curPos;
-    private int lineNum;
+    private int lineIndex;
     private Token curToken;
+    private Token lastToken;
 
     private int savePos;
     private int saveLine;
     private Token saveToken;
+    private Token saveLastToken;
 
     public Lexer(String source) {
         this.source = source;
         this.curPos = 0;
-        this.lineNum = 0;
+        this.lineIndex = 0;
         this.curToken = null;
+        this.lastToken = null;
 
         this.savePos = 0;
         this.saveLine = 0;
         this.saveToken = null;
+        this.saveLastToken = null;
 
         this.next();
     }
@@ -42,7 +49,7 @@ public class Lexer {
             } while (curPos < source.length() && source.charAt(curPos) != '\n');
             if (curPos < source.length() && source.charAt(curPos) == '\n') {
                 curPos++;
-                lineNum++;
+                lineIndex++;
                 // end of single-line comment
             }
         }
@@ -52,7 +59,7 @@ public class Lexer {
             while (curPos < source.length()) {
                 while (curPos < source.length() && source.charAt(curPos) != '*') {
                     if (source.charAt(curPos) == '\n') {
-                        lineNum++;
+                        lineIndex++;
                     }
                     curPos++;
                 }
@@ -80,7 +87,7 @@ public class Lexer {
         if (curPos < source.length() && source.charAt(curPos) == '\"') {
             sb.append(source.charAt(curPos++));
         }
-        curToken = new Token(TokenType.STRCON, sb.toString());
+        curToken = new Token(TokenType.STRCON, sb.toString(), lineIndex + 1);
     }
 
     private void getCharConst() {
@@ -95,7 +102,7 @@ public class Lexer {
         if (curPos < source.length() && source.charAt(curPos) == '\'') {
             sb.append(source.charAt(curPos++));
         }
-        curToken = new Token(TokenType.CHRCON, sb.toString());
+        curToken = new Token(TokenType.CHRCON, sb.toString(), lineIndex + 1);
     }
 
     private void getWord() {
@@ -106,9 +113,9 @@ public class Lexer {
                 (Character.isLetterOrDigit(source.charAt(curPos)) || source.charAt(curPos) == '_'));
 
         if (TokenType.isReservedWord(sb.toString())) {
-            curToken = new Token(TokenType.getReservedType(sb.toString()), sb.toString());
+            curToken = new Token(TokenType.getReservedType(sb.toString()), sb.toString(), lineIndex + 1);
         } else {
-            curToken = new Token(TokenType.IDENFR, sb.toString());
+            curToken = new Token(TokenType.IDENFR, sb.toString(), lineIndex + 1);
         }
     }
 
@@ -117,7 +124,7 @@ public class Lexer {
         do {
             sb.append(source.charAt(curPos++));
         } while (curPos < source.length() && Character.isDigit(source.charAt(curPos)));
-        curToken = new Token(TokenType.INTCON, sb.toString());
+        curToken = new Token(TokenType.INTCON, sb.toString(), lineIndex + 1);
     }
 
     private void getOperator() {
@@ -125,24 +132,37 @@ public class Lexer {
             String op = source.substring(curPos, curPos + 2);
             if (TokenType.isOperator(op)) {
                 curPos += 2;
-                curToken = new Token(TokenType.getOperator(op), op);
+                curToken = new Token(TokenType.getOperator(op), op, lineIndex + 1);
                 return;
             }
         }
         String op = String.valueOf(source.charAt(curPos));
         if (TokenType.isOperator(op)) {
             curPos++;
-            curToken = new Token(TokenType.getOperator(op), op);
+            curToken = new Token(TokenType.getOperator(op), op, lineIndex + 1);
         } else {
-            curPos++;
-            Handler.addErrorInfo((lineNum + 1) + " " + "a");
+            handleSingleAndOr(op);
+            if (op.equals("&") || op.equals("|")) {
+                handleSingleAndOr(op);
+            } else {
+                throw new UnexpectedErrorException("Unexpected Token");
+            }
         }
     }
 
+    private void handleSingleAndOr(String op) {
+        try {
+            throw new UnrecognizedTokenException("Unrecognized token", lineIndex + 1);
+        } catch (UnrecognizedTokenException e) {
+            curPos++;
+            curToken = new Token(op.equals("&") ? TokenType.AND : TokenType.OR, op, lineIndex + 1);
+        }
+    }
 
     public void next() {
         if (curToken != null) {
-            Handler.pushOutput(curToken.getType() + " " + curToken);
+            lastToken = curToken;
+            Handler.addToken(curToken);
         }
         while (curPos < source.length()) {
             char ch = source.charAt(curPos);
@@ -171,7 +191,7 @@ public class Lexer {
                 // Whitespaces
                 if (Character.isWhitespace(ch)) {
                     if (ch == '\n') {
-                        lineNum++;
+                        lineIndex++;
                     }
                     curPos++;
                 }
@@ -181,7 +201,7 @@ public class Lexer {
                     if (nextCh == '/' || nextCh == '*') {
                         handleComment();
                     } else {
-                        curToken = new Token(TokenType.DIV, "/");
+                        curToken = new Token(TokenType.DIV, "/", lineIndex + 1);
                         curPos++;
                         break;
                     }
@@ -201,24 +221,24 @@ public class Lexer {
 
     public boolean lookAhead(TokenType type) {
         int pos = curPos;
-        int line = lineNum;
+        int line = lineIndex;
         Token token = curToken;
 
         next();
 
         Token nextToken = curToken;
         curPos = pos;
-        lineNum = line;
+        lineIndex = line;
         curToken = token;
 
-        Handler.popOutput();
+        Handler.popToken();
 
         return nextToken.getType().equals(type);
     }
 
     public boolean lookDoubleAhead(TokenType type) {
         int pos = curPos;
-        int line = lineNum;
+        int line = lineIndex;
         Token token = curToken;
 
         next();
@@ -226,29 +246,36 @@ public class Lexer {
 
         Token next2Token = curToken;
         curPos = pos;
-        lineNum = line;
+        lineIndex = line;
         curToken = token;
 
-        Handler.popOutput();
-        Handler.popOutput();
+        Handler.popToken();
+        Handler.popToken();
 
         return next2Token.getType().equals(type);
     }
 
     public void save() {
         savePos = curPos;
-        saveLine = lineNum;
+        saveLine = lineIndex;
         saveToken = curToken;
-
     }
 
     public void restore() {
         curPos = savePos;
-        lineNum = saveLine;
+        lineIndex = saveLine;
         curToken = saveToken;
         if (curPos == 0) {
             next();
         }
+    }
+
+    public int getLineNum() {
+        return lineIndex + 1;
+    }
+
+    public Token getLastToken() {
+        return lastToken;
     }
 }
 

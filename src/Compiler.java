@@ -1,9 +1,8 @@
-import lexicon.Token;
+import output.Handler;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
 public class Compiler {
     public static void main(String[] args) {

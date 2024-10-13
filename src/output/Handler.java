@@ -1,3 +1,6 @@
+package output;
+
+import exceptions.ErrorInfo;
 import lexicon.Token;
 
 import java.io.BufferedWriter;
@@ -7,22 +10,30 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 public class Handler {
-    private static final Stack<String> outputStack = new Stack<>();
-    private static final ArrayList<String> errorList = new ArrayList<>();
+    private static final Stack<Token> tokenStack = new Stack<>();
+    private static final ArrayList<ErrorInfo> errorList = new ArrayList<>();
+    private static final Stack<String> outputList = new Stack<>();
 
-    private static final Stack<String> saveOutputStack = new Stack<>();
-    private static final ArrayList<String> saveErrorList = new ArrayList<>();
+    private static final Stack<Token> saveTokenStack = new Stack<>();
+    private static final ArrayList<ErrorInfo> saveErrorList = new ArrayList<>();
+    private static final ArrayList<String> saveOutputList = new ArrayList<>();
 
-    public static void pushOutput(String str) {
-        outputStack.push(str);
+    public static void addToken(Token token) {
+        tokenStack.push(token);
+        outputList.add(token.getType() + " " + token);
     }
 
-    public static void popOutput() {
-        outputStack.pop();
+    public static void popToken() {
+        outputList.pop();
+        tokenStack.pop();
     }
 
-    public static void addErrorInfo(String error) {
+    public static void addErrorInfo(ErrorInfo error) {
         errorList.add(error);
+    }
+
+    public static void addOutputInfo(String output) {
+        outputList.add(output);
     }
 
     public static void print() {
@@ -37,7 +48,7 @@ public class Handler {
     private static void printInfos() {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter("parser.txt"));
-            for (String str : outputStack) {
+            for (String str : outputList) {
                 bw.write(str + "\n");
             }
             bw.flush();
@@ -50,7 +61,7 @@ public class Handler {
     private static void printErrors() {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter("error.txt"));
-            for (String error : errorList) {
+            for (ErrorInfo error : errorList) {
                 bw.write(error + "\n");
             }
             bw.flush();
@@ -61,18 +72,22 @@ public class Handler {
     }
 
     public static void save() {
-        saveOutputStack.clear();
+        saveTokenStack.clear();
         saveErrorList.clear();
+        saveOutputList.clear();
 
-        saveOutputStack.addAll(outputStack);
+        saveTokenStack.addAll(tokenStack);
         saveErrorList.addAll(errorList);
+        saveOutputList.addAll(outputList);
     }
 
     public static void restore() {
-        outputStack.clear();
+        tokenStack.clear();
         errorList.clear();
+        outputList.clear();
 
-        outputStack.addAll(saveOutputStack);
+        tokenStack.addAll(saveTokenStack);
         errorList.addAll(saveErrorList);
+        outputList.addAll(saveOutputList);
     }
 }
