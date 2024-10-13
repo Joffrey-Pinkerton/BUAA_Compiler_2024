@@ -25,4 +25,9 @@ public class EqExp implements Unit {
         }
         return sb.toString();
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

@@ -1,7 +1,8 @@
 package syntax;
 
 // PrimaryExp → '(' Exp ')' | LVal | Number | Character// j
-public class PrimaryExp implements Unit{
+public class PrimaryExp implements Unit {
+    private final UnitType type = UnitType.PRIMARY_EXP;
     private final Exp exp;
     private final LVal lval;
     private final Number number;
@@ -47,4 +48,8 @@ public class PrimaryExp implements Unit{
         }
     }
 
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

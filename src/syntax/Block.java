@@ -20,4 +20,9 @@ public class Block implements Unit {
         str.append("}");
         return str.toString();
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

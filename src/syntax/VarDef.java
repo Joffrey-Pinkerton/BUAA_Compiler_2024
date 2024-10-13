@@ -27,4 +27,9 @@ public class VarDef implements Unit {
         }
     }
 
+    @Override
+    public UnitType getType() {
+        return type;
+    }
+
 }

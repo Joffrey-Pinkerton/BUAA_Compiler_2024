@@ -1,6 +1,6 @@
-package top;
+package core;
 
-import exception.UnexpectedErrorException;
+import exception.unclassified.UnexpectedErrorException;
 import exception.classified.IllegalIdentifierException;
 import lexicon.Token;
 import lexicon.TokenType;
@@ -259,12 +259,14 @@ public class Lexer {
         savePos = curPos;
         saveLine = lineIndex;
         saveToken = curToken;
+        saveLastToken = lastToken;
     }
 
     public void restore() {
         curPos = savePos;
         lineIndex = saveLine;
         curToken = saveToken;
+        lastToken = saveLastToken;
         if (curPos == 0) {
             next();
         }

@@ -1,6 +1,6 @@
 package syntax;
 
-import exception.UnexpectedErrorException;
+import exception.unclassified.UnexpectedErrorException;
 
 import java.util.ArrayList;
 
@@ -27,5 +27,10 @@ public class ConstDecl implements Unit{
             }
         }
         return "const " + btype + " " + constDefsString + ";";
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

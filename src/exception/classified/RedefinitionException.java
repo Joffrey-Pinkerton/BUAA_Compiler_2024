@@ -2,7 +2,7 @@ package exception.classified;
 
 import exception.ErrorCode;
 import exception.ErrorInfo;
-import top.Handler;
+import core.Handler;
 
 public class RedefinitionException extends RuntimeException {
     public RedefinitionException(String message, int lineNum) {

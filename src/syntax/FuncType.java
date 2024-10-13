@@ -12,4 +12,9 @@ public class FuncType implements Unit {
     public String toString() {
         return funcType;
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

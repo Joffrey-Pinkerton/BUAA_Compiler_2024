@@ -12,4 +12,9 @@ public class UnaryOp implements Unit {
     public String toString() {
         return unaryOp;
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

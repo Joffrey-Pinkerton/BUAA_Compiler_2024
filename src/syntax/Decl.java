@@ -1,6 +1,6 @@
 package syntax;
 
-import exception.UnexpectedErrorException;
+import exception.unclassified.UnexpectedErrorException;
 
 // Decl → ConstDecl | VarDecl
 public class Decl implements Unit {
@@ -23,5 +23,10 @@ public class Decl implements Unit {
             throw new UnexpectedErrorException("ConstDecl or VarDecl expected");
         }
         return constDecl != null ? constDecl.toString() : varDecl.toString();
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

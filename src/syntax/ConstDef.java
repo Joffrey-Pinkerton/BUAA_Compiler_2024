@@ -1,7 +1,7 @@
 package syntax;
 
 // ConstDef → Ident [ '[' ConstExp ']' ] '=' ConstInitVal // k
-public class ConstDef implements Unit{
+public class ConstDef implements Unit {
     private static final UnitType type = UnitType.CONST_DEF;
     private final String ident;
     private final ConstExp constExp;
@@ -23,4 +23,8 @@ public class ConstDef implements Unit{
         return ident + (constExp == null ? "" : "[" + constExp + "]") + " = " + constInitVal;
     }
 
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

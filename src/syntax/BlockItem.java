@@ -23,4 +23,9 @@ public class BlockItem implements Unit {
             return stmt.toString();
         }
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

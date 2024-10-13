@@ -14,4 +14,9 @@ public class ForStmt implements Unit {
     public String toString() {
         return lval + " = " + exp;
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

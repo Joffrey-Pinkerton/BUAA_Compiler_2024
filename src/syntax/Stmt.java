@@ -1,6 +1,6 @@
 package syntax;
 
-import exception.UnexpectedErrorException;
+import exception.unclassified.UnexpectedErrorException;
 
 import java.util.ArrayList;
 
@@ -68,5 +68,10 @@ public class Stmt implements Unit {
             default:
                 throw new UnexpectedErrorException("Unexpected StmtType: " + stmtType);
         }
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

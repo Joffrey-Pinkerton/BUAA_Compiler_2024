@@ -12,4 +12,9 @@ public class MainFuncDef implements Unit {
     public String toString() {
         return "int main() " + block.toString();
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

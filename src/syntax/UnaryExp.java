@@ -43,4 +43,9 @@ public class UnaryExp implements Unit{
             return unaryOp.toString() + unaryExp.toString();
         }
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

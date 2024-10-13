@@ -1,6 +1,6 @@
 package syntax;
 
-import exception.UnexpectedErrorException;
+import exception.unclassified.UnexpectedErrorException;
 
 import java.util.ArrayList;
 
@@ -24,5 +24,10 @@ public class LOrExp implements Unit{
         }
         sb.delete(sb.length() - 4, sb.length());
         return sb.toString();
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

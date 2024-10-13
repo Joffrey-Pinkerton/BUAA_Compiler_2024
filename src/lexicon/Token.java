@@ -1,6 +1,7 @@
 package lexicon;
 
 import syntax.Unit;
+import syntax.UnitType;
 
 public class Token implements Unit {
     private final TokenType tokenType;
@@ -28,5 +29,10 @@ public class Token implements Unit {
 
     public int getLineNum() {
         return lineNum;
+    }
+
+    @Override
+    public UnitType getType() {
+        return UnitType.TOKEN;
     }
 }

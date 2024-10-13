@@ -26,4 +26,9 @@ public class CompUnit implements Unit {
         sb.append(mainFuncDef).append("\n");
         return sb.toString();
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

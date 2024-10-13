@@ -43,6 +43,7 @@ public enum UnitType {
         {
             put(COMP_UNIT, "CompUnit");
             put(DECL, "Decl");
+            put(B_TYPE, "BType");
             put(CONST_DECL, "ConstDecl");
             put(VAR_DECL, "VarDecl");
             put(CONST_DEF, "ConstDef");

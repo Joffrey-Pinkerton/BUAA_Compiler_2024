@@ -20,4 +20,9 @@ public class FuncRParams implements Unit{
         sb.delete(sb.length() - 2, sb.length());
         return sb.toString();
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

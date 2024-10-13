@@ -12,4 +12,9 @@ public class Number implements Unit {
     public String toString() {
         return intConst;
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

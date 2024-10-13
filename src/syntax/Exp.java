@@ -12,4 +12,9 @@ public class Exp implements Unit{
     public String toString() {
         return addExp.toString();
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

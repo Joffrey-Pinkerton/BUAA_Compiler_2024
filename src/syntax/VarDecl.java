@@ -25,4 +25,10 @@ public class VarDecl implements Unit {
 
         return varDefsString.toString();
     }
+
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

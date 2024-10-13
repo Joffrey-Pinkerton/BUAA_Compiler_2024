@@ -1,4 +1,4 @@
-package exception;
+package exception.unclassified;
 
 public class SyntaxErrorException extends RuntimeException {
     public SyntaxErrorException(String message) {

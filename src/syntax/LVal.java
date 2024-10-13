@@ -19,4 +19,9 @@ public class LVal implements Unit {
     public String toString() {
         return ident + (exp == null ? "" : "[" + exp + "]");
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

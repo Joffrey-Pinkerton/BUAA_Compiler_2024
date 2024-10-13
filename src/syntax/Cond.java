@@ -13,4 +13,9 @@ public class Cond implements Unit {
         return lOrExp.toString();
     }
 
+    @Override
+    public UnitType getType() {
+        return type;
+    }
+
 }

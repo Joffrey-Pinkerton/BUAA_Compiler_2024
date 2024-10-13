@@ -12,4 +12,9 @@ public class BType implements Unit{
     public String toString() {
         return btype;
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

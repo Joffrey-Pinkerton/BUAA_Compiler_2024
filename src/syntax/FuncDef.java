@@ -18,4 +18,9 @@ public class FuncDef implements Unit {
     public String toString() {
         return funcType + " " + ident + " " + "(" + funcFParams + ")" + block;
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

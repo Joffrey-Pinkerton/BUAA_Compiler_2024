@@ -26,4 +26,9 @@ public class AddExp implements Unit {
         }
         return sb.toString();
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

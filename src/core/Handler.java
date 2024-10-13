@@ -1,4 +1,4 @@
-package top;
+package core;
 
 import exception.ErrorInfo;
 import lexicon.Token;

@@ -12,4 +12,9 @@ public class Character implements Unit {
     public String toString() {
         return String.valueOf(charConst);
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

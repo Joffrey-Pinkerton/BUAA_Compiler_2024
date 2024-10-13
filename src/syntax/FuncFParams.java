@@ -21,4 +21,9 @@ public class FuncFParams implements Unit{
         }
         return funcFParamsStr.toString();
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }

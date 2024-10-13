@@ -43,4 +43,9 @@ public class InitVal implements Unit {
         sb.append("}");
         return sb.toString();
     }
+
+    @Override
+    public UnitType getType() {
+        return type;
+    }
 }
