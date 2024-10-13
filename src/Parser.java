@@ -110,6 +110,7 @@ public class Parser {
             lexer.next();
             if (lexer.lookCurrent(TokenType.RBRACE)) {
                 lexer.next();
+                Handler.addOutputInfo("<ConstInitVal>");
                 return new ConstInitVal(new ArrayList<>());
             }
             ArrayList<ConstExp> constExps = new ArrayList<>();
