@@ -3,9 +3,10 @@ package syntax;
 import java.util.ArrayList;
 
 // VarDecl → BType VarDef { ',' VarDef } ';' // i
-public class VarDecl implements Unit{
-    public final BType bType;
-    public final ArrayList<VarDef> varDefs = new ArrayList<>();
+public class VarDecl implements Unit {
+    private static final UnitType type = UnitType.VAR_DECL;
+    private final BType bType;
+    private final ArrayList<VarDef> varDefs = new ArrayList<>();
 
     public VarDecl(BType bType, ArrayList<VarDef> varDefs) {
         this.bType = bType;
@@ -23,5 +24,11 @@ public class VarDecl implements Unit{
         varDefsString.append(";");
 
         return varDefsString.toString();
+    }
+
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

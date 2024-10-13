@@ -1,14 +1,15 @@
 package lexicon;
 
 import syntax.Unit;
+import syntax.UnitType;
 
 public class Token implements Unit {
-    private final TokenType type;
+    private final TokenType tokenType;
     private final String value;
     private final int lineNum;
 
-    public Token(TokenType type, String value, int lineNum) {
-        this.type = type;
+    public Token(TokenType tokenType, String value, int lineNum) {
+        this.tokenType = tokenType;
         this.value = value;
         this.lineNum = lineNum;
     }
@@ -22,11 +23,16 @@ public class Token implements Unit {
         return value;
     }
 
-    public TokenType getType() {
-        return type;
+    public TokenType getTokenType() {
+        return tokenType;
     }
 
     public int getLineNum() {
         return lineNum;
+    }
+
+    @Override
+    public UnitType getType() {
+        return UnitType.TOKEN;
     }
 }

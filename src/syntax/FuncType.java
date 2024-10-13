@@ -1,7 +1,8 @@
 package syntax;
 
 //  FuncType → 'void' | 'int' | 'char'
-public class FuncType implements Unit{
+public class FuncType implements Unit {
+    private static final UnitType type = UnitType.FUNC_TYPE;
     private final String funcType;
 
     public FuncType(String funcType) {
@@ -10,5 +11,10 @@ public class FuncType implements Unit{
 
     public String toString() {
         return funcType;
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

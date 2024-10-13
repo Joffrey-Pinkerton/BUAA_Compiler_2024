@@ -1,7 +1,8 @@
-package top;
+package core;
 
 import exception.ErrorInfo;
 import lexicon.Token;
+import syntax.Unit;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -10,30 +11,22 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 public class Handler {
-    private static final Stack<Token> tokenStack = new Stack<>();
+    private static final Stack<Unit> unitStack = new Stack<>();
     private static final ArrayList<ErrorInfo> errorList = new ArrayList<>();
-    private static final Stack<String> outputList = new Stack<>();
 
-    private static final Stack<Token> saveTokenStack = new Stack<>();
+    private static final Stack<Unit> saveUnitStack = new Stack<>();
     private static final ArrayList<ErrorInfo> saveErrorList = new ArrayList<>();
-    private static final ArrayList<String> saveOutputList = new ArrayList<>();
 
-    public static void addToken(Token token) {
-        tokenStack.push(token);
-        outputList.add(token.getType() + " " + token);
+    public static void addSyntacticUnit(Unit unit) {
+        unitStack.push(unit);
     }
 
-    public static void popToken() {
-        outputList.pop();
-        tokenStack.pop();
+    public static void popSyntacticUnit() {
+        unitStack.pop();
     }
 
     public static void addErrorInfo(ErrorInfo error) {
         errorList.add(error);
-    }
-
-    public static void addOutputInfo(String output) {
-        outputList.add(output);
     }
 
     public static void print() {
@@ -48,8 +41,10 @@ public class Handler {
     private static void printInfos() {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter("parser.txt"));
-            for (String str : outputList) {
-                bw.write(str + "\n");
+
+            for (Unit unit : unitStack) {
+                String output = unit instanceof Token ? (((Token) unit).getTokenType() + " " + unit) : unit.getType().toString();
+                bw.write(output + "\n");
             }
             bw.flush();
             bw.close();
@@ -72,22 +67,18 @@ public class Handler {
     }
 
     public static void save() {
-        saveTokenStack.clear();
+        saveUnitStack.clear();
         saveErrorList.clear();
-        saveOutputList.clear();
 
-        saveTokenStack.addAll(tokenStack);
+        saveUnitStack.addAll(unitStack);
         saveErrorList.addAll(errorList);
-        saveOutputList.addAll(outputList);
     }
 
     public static void restore() {
-        tokenStack.clear();
+        unitStack.clear();
         errorList.clear();
-        outputList.clear();
 
-        tokenStack.addAll(saveTokenStack);
+        unitStack.addAll(saveUnitStack);
         errorList.addAll(saveErrorList);
-        outputList.addAll(saveOutputList);
     }
 }

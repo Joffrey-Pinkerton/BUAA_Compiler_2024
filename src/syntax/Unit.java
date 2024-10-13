@@ -1,5 +1,7 @@
 package syntax;
 
 public interface Unit {
-    public String toString();
+    String toString();
+
+    UnitType getType();
 }

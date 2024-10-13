@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 // FuncFParams → FuncFParam { ',' FuncFParam }
 public class FuncFParams implements Unit{
+    private static final UnitType type = UnitType.FUNC_F_PARAMS;
     private final ArrayList<FuncFParam> funcFParams = new ArrayList<>();
 
     public FuncFParams(ArrayList<FuncFParam> funcFParams) {
@@ -19,5 +20,10 @@ public class FuncFParams implements Unit{
             }
         }
         return funcFParamsStr.toString();
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

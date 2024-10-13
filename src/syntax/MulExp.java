@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 // MulExp → UnaryExp | MulExp ('*' | '/' | '%') UnaryExp
 public class MulExp implements Unit{
+    private static final UnitType type = UnitType.MUL_EXP;
     private final ArrayList<UnaryExp> unaryExps = new ArrayList<>();
     private final ArrayList<Token> operators = new ArrayList<>();
 
@@ -23,5 +24,10 @@ public class MulExp implements Unit{
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

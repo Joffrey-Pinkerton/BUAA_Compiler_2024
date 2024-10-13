@@ -3,7 +3,8 @@ package syntax;
 import java.util.ArrayList;
 
 // CompUnit → {Decl} {FuncDef} MainFuncDef
-public class CompUnit implements Unit{
+public class CompUnit implements Unit {
+    private static final UnitType type = UnitType.COMP_UNIT;
     private final ArrayList<Decl> decls = new ArrayList<>();
     private final ArrayList<FuncDef> funcDefs = new ArrayList<>();
     private final MainFuncDef mainFuncDef;
@@ -24,5 +25,10 @@ public class CompUnit implements Unit{
         }
         sb.append(mainFuncDef).append("\n");
         return sb.toString();
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

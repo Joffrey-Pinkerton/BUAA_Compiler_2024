@@ -3,7 +3,8 @@ package syntax;
 import java.util.ArrayList;
 
 // ConstInitVal → ConstExp | '{' [ ConstExp { ',' ConstExp } ] '}' | StringConst
-public class ConstInitVal implements Unit{
+public class ConstInitVal implements Unit {
+    private static final UnitType type = UnitType.CONST_INIT_VAL;
     private final ConstExp constExp;
     private final ArrayList<ConstExp> constExps = new ArrayList<>();
     private final String stringConst;
@@ -41,5 +42,10 @@ public class ConstInitVal implements Unit{
         }
         sb.append("}");
         return sb.toString();
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

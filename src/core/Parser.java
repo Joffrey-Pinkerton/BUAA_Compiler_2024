@@ -1,12 +1,14 @@
-package top;
+package core;
 
-import exception.MissingRightBracketException;
-import exception.MissingRightParenthesisException;
-import exception.MissingSemicolonException;
-import exception.SyntaxErrorException;
+import exception.classified.MissingRightBracketException;
+import exception.classified.MissingRightParenthesisException;
+import exception.classified.MissingSemicolonException;
+import exception.unclassified.SyntaxErrorException;
 import lexicon.Token;
 import lexicon.TokenType;
 import syntax.*;
+import syntax.Character;
+import syntax.Number;
 
 import java.util.ArrayList;
 
@@ -33,8 +35,9 @@ public class Parser {
         }
         MainFuncDef mainFuncDef = parseMainFuncDef();
 
-        Handler.addOutputInfo("<CompUnit>");
-        return new CompUnit(decls, funcDefs, mainFuncDef);
+        CompUnit compUnit = new CompUnit(decls, funcDefs, mainFuncDef);
+        Handler.addSyntacticUnit(compUnit);
+        return compUnit;
     }
 
     public Decl parseDecl() {
@@ -57,8 +60,10 @@ public class Parser {
             constDefs.add(parseConstDef());
         }
         checkSemicolonAndPass();
-        Handler.addOutputInfo("<ConstDecl>");
-        return new ConstDecl(bType, constDefs);
+
+        ConstDecl constDecl = new ConstDecl(bType, constDefs);
+        Handler.addSyntacticUnit(constDecl);
+        return constDecl;
     }
 
     public BType parseBType() {
@@ -96,8 +101,10 @@ public class Parser {
         lexer.next();
         ConstInitVal constInitVal = parseConstInitVal();
 
-        Handler.addOutputInfo("<ConstDef>");
-        return isArray ? new ConstDef(ident, constExp, constInitVal) : new ConstDef(ident, constInitVal);
+
+        ConstDef constDef = isArray ? new ConstDef(ident, constExp, constInitVal) : new ConstDef(ident, constInitVal);
+        Handler.addSyntacticUnit(constDef);
+        return constDef;
     }
 
     public ConstInitVal parseConstInitVal() {
@@ -105,14 +112,16 @@ public class Parser {
         if (lexer.lookCurrent(TokenType.STRCON)) {
             String str = lexer.peek().getValue();
             lexer.next();
-            Handler.addOutputInfo("<ConstInitVal>");
-            return new ConstInitVal(str);
+            ConstInitVal constInitVal = new ConstInitVal(str);
+            Handler.addSyntacticUnit(constInitVal);
+            return constInitVal;
         } else if (lexer.lookCurrent(TokenType.LBRACE)) {
             lexer.next();
             if (lexer.lookCurrent(TokenType.RBRACE)) {
                 lexer.next();
-                Handler.addOutputInfo("<ConstInitVal>");
-                return new ConstInitVal(new ArrayList<>());
+                ConstInitVal constInitVal = new ConstInitVal(new ArrayList<>());
+                Handler.addSyntacticUnit(constInitVal);
+                return constInitVal;
             }
             ArrayList<ConstExp> constExps = new ArrayList<>();
             constExps.add(parseConstExp());
@@ -124,12 +133,14 @@ public class Parser {
                 throw new SyntaxErrorException("Expect '}', but get " + lexer.peek());
             }
             lexer.next();
-            Handler.addOutputInfo("<ConstInitVal>");
-            return new ConstInitVal(constExps);
+            ConstInitVal constInitVal = new ConstInitVal(constExps);
+            Handler.addSyntacticUnit(constInitVal);
+            return constInitVal;
         } else {
             ConstExp constExp = parseConstExp();
-            Handler.addOutputInfo("<ConstInitVal>");
-            return new ConstInitVal(constExp);
+            ConstInitVal constInitVal = new ConstInitVal(constExp);
+            Handler.addSyntacticUnit(constInitVal);
+            return constInitVal;
         }
     }
 
@@ -143,8 +154,10 @@ public class Parser {
             varDefs.add(parseVarDef());
         }
         checkSemicolonAndPass();
-        Handler.addOutputInfo("<VarDecl>");
-        return new VarDecl(bType, varDefs);
+
+        VarDecl varDecl = new VarDecl(bType, varDefs);
+        Handler.addSyntacticUnit(varDecl);
+        return varDecl;
     }
 
     public VarDef parseVarDef() {
@@ -163,12 +176,13 @@ public class Parser {
         }
         if (lexer.lookCurrent(TokenType.ASSIGN)) {
             lexer.next();
-            InitVal initVal = parseInitVal();
-            Handler.addOutputInfo("<VarDef>");
-            return new VarDef(ident, constExp, initVal);
+            VarDef varDef = new VarDef(ident, constExp, parseInitVal());
+            Handler.addSyntacticUnit(varDef);
+            return varDef;
         } else {
-            Handler.addOutputInfo("<VarDef>");
-            return new VarDef(ident, constExp);
+            VarDef varDef = new VarDef(ident, constExp);
+            Handler.addSyntacticUnit(varDef);
+            return varDef;
         }
     }
 
@@ -177,14 +191,16 @@ public class Parser {
         if (lexer.lookCurrent(TokenType.STRCON)) {
             String str = lexer.peek().getValue();
             lexer.next();
-            Handler.addOutputInfo("<InitVal>");
-            return new InitVal(str);
+            InitVal initVal = new InitVal(str);
+            Handler.addSyntacticUnit(initVal);
+            return initVal;
         } else if (lexer.lookCurrent(TokenType.LBRACE)) {
             lexer.next();
             if (lexer.lookCurrent(TokenType.RBRACE)) {
                 lexer.next();
-                Handler.addOutputInfo("<InitVal>");
-                return new InitVal(new ArrayList<>());
+                InitVal initVal = new InitVal(new ArrayList<>());
+                Handler.addSyntacticUnit(initVal);
+                return initVal;
             }
             ArrayList<Exp> exps = new ArrayList<>();
             exps.add(parseExp());
@@ -196,12 +212,13 @@ public class Parser {
                 throw new SyntaxErrorException("Expect '}', but get " + lexer.peek());
             }
             lexer.next();
-            Handler.addOutputInfo("<InitVal>");
-            return new InitVal(exps);
+            InitVal initVal = new InitVal(exps);
+            Handler.addSyntacticUnit(initVal);
+            return initVal;
         } else {
-            Exp exp = parseExp();
-            Handler.addOutputInfo("<InitVal>");
-            return new InitVal(exp);
+            InitVal initVal = new InitVal(parseExp());
+            Handler.addSyntacticUnit(initVal);
+            return initVal;
         }
     }
 
@@ -224,13 +241,15 @@ public class Parser {
             FuncFParams funcFParams = parseFuncFParams();
             checkRightParenthesisAndPass();
             Block block = parseBlock();
-            Handler.addOutputInfo("<FuncDef>");
-            return new FuncDef(funcType, funcName, funcFParams, block);
+            FuncDef funcDef = new FuncDef(funcType, funcName, funcFParams, block);
+            Handler.addSyntacticUnit(funcDef);
+            return funcDef;
         } else {
             checkRightParenthesisAndPass();
             Block block = parseBlock();
-            Handler.addOutputInfo("<FuncDef>");
-            return new FuncDef(funcType, funcName, new FuncFParams(new ArrayList<>()), block);
+            FuncDef funcDef = new FuncDef(funcType, funcName, new FuncFParams(new ArrayList<>()), block);
+            Handler.addSyntacticUnit(funcDef);
+            return funcDef;
         }
     }
 
@@ -239,10 +258,10 @@ public class Parser {
         if (!lexer.lookCurrent(TokenType.INTTK) && !lexer.lookCurrent(TokenType.CHARTK) && !lexer.lookCurrent(TokenType.VOIDTK)) {
             throw new SyntaxErrorException("Expect 'int', 'char', or 'void', but get " + lexer.peek());
         }
-        String funcType = lexer.lookCurrent(TokenType.INTTK) ? "int" : lexer.lookCurrent(TokenType.CHARTK) ? "char" : "void";
+        FuncType funcType = new FuncType(lexer.lookCurrent(TokenType.INTTK) ? "int" : lexer.lookCurrent(TokenType.CHARTK) ? "char" : "void");
         lexer.next();
-        Handler.addOutputInfo("<FuncType>");
-        return new FuncType(funcType);
+        Handler.addSyntacticUnit(funcType);
+        return funcType;
     }
 
     public MainFuncDef parseMainFuncDef() {
@@ -262,22 +281,25 @@ public class Parser {
         lexer.next();
         checkRightParenthesisAndPass();
         Block block = parseBlock();
-        Handler.addOutputInfo("<MainFuncDef>");
-        return new MainFuncDef(block);
+
+        MainFuncDef mainFuncDef = new MainFuncDef(block);
+        Handler.addSyntacticUnit(mainFuncDef);
+        return mainFuncDef;
     }
 
     public FuncFParams parseFuncFParams() {
         // FuncFParams → FuncFParam { ',' FuncFParam }
-        ArrayList<FuncFParam> funcFParams = new ArrayList<>();
+        ArrayList<FuncFParam> params = new ArrayList<>();
 
-        funcFParams.add(parseFuncFParam());
+        params.add(parseFuncFParam());
 
         while (lexer.lookCurrent(TokenType.COMMA)) {
             lexer.next();
-            funcFParams.add(parseFuncFParam());
+            params.add(parseFuncFParam());
         }
-        Handler.addOutputInfo("<FuncFParams>");
-        return new FuncFParams(funcFParams);
+        FuncFParams funcFParams = new FuncFParams(params);
+        Handler.addSyntacticUnit(funcFParams);
+        return funcFParams;
     }
 
     public FuncFParam parseFuncFParam() {
@@ -295,8 +317,9 @@ public class Parser {
             lexer.next();
             checkRightBracketAndPass();
         }
-        Handler.addOutputInfo("<FuncFParam>");
-        return new FuncFParam(bType, ident, isArray);
+        FuncFParam funcFParam = new FuncFParam(bType, ident, isArray);
+        Handler.addSyntacticUnit(funcFParam);
+        return funcFParam;
     }
 
     public Block parseBlock() {
@@ -310,8 +333,9 @@ public class Parser {
             blockItems.add(parseBlockItem());
         }
         lexer.next();
-        Handler.addOutputInfo("<Block>");
-        return new Block(blockItems);
+        Block block = new Block(blockItems);
+        Handler.addSyntacticUnit(block);
+        return block;
     }
 
     public BlockItem parseBlockItem() {
@@ -343,8 +367,9 @@ public class Parser {
             Stmt elseStmt = parseStmt();
             units.add(elseStmt);
         }
-        Handler.addOutputInfo("<Stmt>");
-        return new Stmt(StmtType.IF, units);
+        Stmt stmt = new Stmt(StmtType.IF, units);
+        Handler.addSyntacticUnit(stmt);
+        return stmt;
     }
 
     private Stmt parseStmtFor() {
@@ -389,8 +414,9 @@ public class Parser {
         }
         Stmt stmt = parseStmt();
         units.add(stmt);
-        Handler.addOutputInfo("<Stmt>");
-        return new Stmt(StmtType.FOR, units);
+        Stmt forStmt = new Stmt(StmtType.FOR, units);
+        Handler.addSyntacticUnit(forStmt);
+        return forStmt;
     }
 
     private Stmt parseStmtPrintf() {
@@ -412,8 +438,9 @@ public class Parser {
         }
         checkRightParenthesisAndPass();
         checkSemicolonAndPass();
-        Handler.addOutputInfo("<Stmt>");
-        return new Stmt(StmtType.PRINTF, units);
+        Stmt stmt = new Stmt(StmtType.PRINTF, units);
+        Handler.addSyntacticUnit(stmt);
+        return stmt;
     }
 
     private Stmt parseStmtOther() {
@@ -427,10 +454,10 @@ public class Parser {
             units.add(parseExp());
             try {
                 checkSemicolonAndPass();
-                Handler.addOutputInfo("<Stmt>");
-                return new Stmt(StmtType.EXPR, units);
+                Stmt stmt = new Stmt(StmtType.EXPR, units);
+                Handler.addSyntacticUnit(stmt);
+                return stmt;
             } catch (SyntaxErrorException e) {
-                // Handler.addOutputInfo("<Stmt>");
                 return new Stmt(StmtType.EXPR, units);
             }
         }
@@ -439,14 +466,14 @@ public class Parser {
             lexer.save();
             Handler.save();
             units.add(parseExp());// Possible Exception Here
-            // checkSemicolonAndPass();
             if (!lexer.lookCurrent(TokenType.SEMICN)) {
                 throw new MissingSemicolonException("Expect ';', but get " + lexer.peek(), lexer.getLastToken().getLineNum());
             }
             lexer.next();
-            Handler.addOutputInfo("<Stmt>");
-            return new Stmt(StmtType.EXPR, units);
-        } catch (Exception e) {// NOT EXPR, starts with LVal!
+            Stmt stmt = new Stmt(StmtType.EXPR, units);
+            Handler.addSyntacticUnit(stmt);
+            return stmt;
+        } catch (Exception e) { // NOT EXPR, starts with LVal!
             lexer.restore();
             Handler.restore();
             units.clear();
@@ -466,53 +493,60 @@ public class Parser {
                 lexer.next();
                 checkRightParenthesisAndPass();
                 checkSemicolonAndPass();
-                Handler.addOutputInfo("<Stmt>");
-                return new Stmt(stmtType, units);
+                Stmt stmt = new Stmt(stmtType, units);
+                Handler.addSyntacticUnit(stmt);
+                return stmt;
             } else { // ASSIGN
                 units.add(parseExp());
                 checkSemicolonAndPass();
-                Handler.addOutputInfo("<Stmt>");
-                return new Stmt(StmtType.ASSIGN, units);
+                Stmt stmt = new Stmt(StmtType.ASSIGN, units);
+                Handler.addSyntacticUnit(stmt);
+                return stmt;
             }
         }
-
     }
+
 
     private Stmt parseStmtBlock() {
         Block block = parseBlock();
-        Handler.addOutputInfo("<Stmt>");
-        return new Stmt(StmtType.BLOCK, new ArrayList<>() {{
+        Stmt stmt = new Stmt(StmtType.BLOCK, new ArrayList<>() {{
             add(block);
         }});
+        Handler.addSyntacticUnit(stmt);
+        return stmt;
     }
 
     private Stmt parseStmtReturn() {
         lexer.next();
         if (lexer.lookCurrent(TokenType.SEMICN)) {
             lexer.next();
-            Handler.addOutputInfo("<Stmt>");
-            return new Stmt(StmtType.RETURN);
+            Stmt stmt = new Stmt(StmtType.RETURN);
+            Handler.addSyntacticUnit(stmt);
+            return stmt;
         } else {
             ArrayList<Unit> units = new ArrayList<>();
             units.add(parseExp());
             checkSemicolonAndPass();
-            Handler.addOutputInfo("<Stmt>");
-            return new Stmt(StmtType.RETURN, units);
+            Stmt stmt = new Stmt(StmtType.RETURN, units);
+            Handler.addSyntacticUnit(stmt);
+            return stmt;
         }
     }
 
     private Stmt parseStmtBreak() {
         lexer.next();
         checkSemicolonAndPass();
-        Handler.addOutputInfo("<Stmt>");
-        return new Stmt(StmtType.BREAK);
+        Stmt stmt = new Stmt(StmtType.BREAK);
+        Handler.addSyntacticUnit(stmt);
+        return stmt;
     }
 
     private Stmt parseStmtContinue() {
         lexer.next();
         checkSemicolonAndPass();
-        Handler.addOutputInfo("<Stmt>");
-        return new Stmt(StmtType.CONTINUE);
+        Stmt stmt = new Stmt(StmtType.CONTINUE);
+        Handler.addSyntacticUnit(stmt);
+        return stmt;
     }
 
     private void checkSemicolonAndPass() {
@@ -527,9 +561,11 @@ public class Parser {
 
     private Stmt parseStmtEmpty() {
         lexer.next();
-        Handler.addOutputInfo("<Stmt>");
-        return new Stmt(StmtType.EMPTY);
+        Stmt stmt = new Stmt(StmtType.EMPTY);
+        Handler.addSyntacticUnit(stmt);
+        return stmt;
     }
+
 
     public Stmt parseStmt() {
         //ASSIGN          //Stmt → LVal '=' Exp ';' // i
@@ -542,7 +578,7 @@ public class Parser {
         //GETINT          //        | LVal '=' 'getint''('')'';' // i j
         //GETCHAR         //        | LVal '=' 'getchar''('')'';' // i j
         //PRINTF          //        | 'printf''('StringConst {','Exp}')'';' // i j
-        return switch (lexer.peek().getType()) {
+        return switch (lexer.peek().getTokenType()) {
             case LBRACE -> parseStmtBlock(); // BLOCK
             case IFTK -> parseStmtIf(); // IF
             case FORTK -> parseStmtFor(); // FOR
@@ -563,22 +599,25 @@ public class Parser {
         }
         lexer.next();
         Exp exp = parseExp();
-        Handler.addOutputInfo("<ForStmt>");
-        return new ForStmt(lVal, exp);
+        ForStmt forStmt = new ForStmt(lVal, exp);
+        Handler.addSyntacticUnit(forStmt);
+        return forStmt;
     }
 
     public Exp parseExp() {
         // Exp → AddExp
         AddExp addExp = parseAddExp();
-        Handler.addOutputInfo("<Exp>");
-        return new Exp(addExp);
+        Exp exp = new Exp(addExp);
+        Handler.addSyntacticUnit(exp);
+        return exp;
     }
 
     public Cond parseCond() {
         // Cond → LOrExp
         LOrExp lOrExp = parseLOrExp();
-        Handler.addOutputInfo("<Cond>");
-        return new Cond(lOrExp);
+        Cond cond = new Cond(lOrExp);
+        Handler.addSyntacticUnit(cond);
+        return cond;
     }
 
     public LVal parseLVal() {
@@ -592,11 +631,13 @@ public class Parser {
             lexer.next();
             Exp exp = parseExp();
             checkRightBracketAndPass();
-            Handler.addOutputInfo("<LVal>");
-            return new LVal(ident, exp);
+            LVal lVal = new LVal(ident, exp);
+            Handler.addSyntacticUnit(lVal);
+            return lVal;
         } else {
-            Handler.addOutputInfo("<LVal>");
-            return new LVal(ident);
+            LVal lVal = new LVal(ident);
+            Handler.addSyntacticUnit(lVal);
+            return lVal;
         }
     }
 
@@ -616,40 +657,46 @@ public class Parser {
             lexer.next();
             Exp exp = parseExp();
             checkRightParenthesisAndPass();
-            Handler.addOutputInfo("<PrimaryExp>");
-            return new PrimaryExp(exp);
+            PrimaryExp primaryExp = new PrimaryExp(exp);
+            Handler.addSyntacticUnit(primaryExp);
+            return primaryExp;
         } else if (lexer.lookCurrent(TokenType.INTCON)) {
-            Num number = parseNumber();
-            Handler.addOutputInfo("<PrimaryExp>");
-            return new PrimaryExp(number);
+            Number number = parseNumber();
+            PrimaryExp primaryExp = new PrimaryExp(number);
+            Handler.addSyntacticUnit(primaryExp);
+            return primaryExp;
         } else if (lexer.lookCurrent(TokenType.CHRCON)) {
-            Char character = parseCharacter();
-            Handler.addOutputInfo("<PrimaryExp>");
-            return new PrimaryExp(character);
+            Character character = parseCharacter();
+            PrimaryExp primaryExp = new PrimaryExp(character);
+            Handler.addSyntacticUnit(primaryExp);
+            return primaryExp;
         } else {
             LVal lVal = parseLVal();
-            Handler.addOutputInfo("<PrimaryExp>");
-            return new PrimaryExp(lVal);
+            PrimaryExp primaryExp = new PrimaryExp(lVal);
+            Handler.addSyntacticUnit(primaryExp);
+            return primaryExp;
         }
     }
 
-    public Num parseNumber() {
+    public Number parseNumber() {
         if (lexer.lookCurrent(TokenType.INTCON)) {
             String intConst = lexer.peek().getValue();
             lexer.next();
-            Handler.addOutputInfo("<Number>");
-            return new Num(intConst);
+            Number number = new Number(intConst);
+            Handler.addSyntacticUnit(number);
+            return number;
         } else {
             throw new SyntaxErrorException("Expect an integer constant, but get " + lexer.peek());
         }
     }
 
-    public Char parseCharacter() {
+    public Character parseCharacter() {
         if (lexer.lookCurrent(TokenType.CHRCON)) {
             char charConst = lexer.peek().getValue().charAt(0);
             lexer.next();
-            Handler.addOutputInfo("<Character>");
-            return new Char(charConst);
+            Character character = new Character(charConst);
+            Handler.addSyntacticUnit(character);
+            return character;
         } else {
             throw new SyntaxErrorException("Expect a character constant, but get " + lexer.peek());
         }
@@ -666,22 +713,26 @@ public class Parser {
                     lexer.lookCurrent(TokenType.IDENFR)) {
                 FuncRParams funcRParams = parseFuncRParams();
                 checkRightParenthesisAndPass();
-                Handler.addOutputInfo("<UnaryExp>");
-                return new UnaryExp(ident, funcRParams);
+                UnaryExp unaryExp = new UnaryExp(ident, funcRParams);
+                Handler.addSyntacticUnit(unaryExp);
+                return unaryExp;
             } else {
                 checkRightParenthesisAndPass();
-                Handler.addOutputInfo("<UnaryExp>");
-                return new UnaryExp(ident, null);
+                UnaryExp unaryExp = new UnaryExp(ident, null);
+                Handler.addSyntacticUnit(unaryExp);
+                return unaryExp;
             }
         } else if (lexer.lookCurrent(TokenType.PLUS) || lexer.lookCurrent(TokenType.MINU) || lexer.lookCurrent(TokenType.NOT)) {
             UnaryOp unaryOp = parseUnaryOp();
             UnaryExp unaryExp = parseUnaryExp();
-            Handler.addOutputInfo("<UnaryExp>");
-            return new UnaryExp(unaryOp, unaryExp);
+            UnaryExp result = new UnaryExp(unaryOp, unaryExp);
+            Handler.addSyntacticUnit(result);
+            return result;
         } else {
             PrimaryExp primaryExp = parsePrimaryExp();
-            Handler.addOutputInfo("<UnaryExp>");
-            return new UnaryExp(primaryExp);
+            UnaryExp unaryExp = new UnaryExp(primaryExp);
+            Handler.addSyntacticUnit(unaryExp);
+            return unaryExp;
         }
     }
 
@@ -699,8 +750,9 @@ public class Parser {
         // UnaryOp → '+' | '−' | '!'
         if (lexer.lookCurrent(TokenType.PLUS) || lexer.lookCurrent(TokenType.MINU) || lexer.lookCurrent(TokenType.NOT)) {
             lexer.next();
-            Handler.addOutputInfo("<UnaryOp>");
-            return new UnaryOp(lexer.peek().getValue());
+            UnaryOp unaryOp = new UnaryOp(lexer.peek().getValue());
+            Handler.addSyntacticUnit(unaryOp);
+            return unaryOp;
         } else {
             throw new SyntaxErrorException("Expect '+', '-', or '!', but get " + lexer.peek());
         }
@@ -714,8 +766,9 @@ public class Parser {
             lexer.next();
             exps.add(parseExp());
         }
-        Handler.addOutputInfo("<FuncRParams>");
-        return new FuncRParams(exps);
+        FuncRParams funcRParams = new FuncRParams(exps);
+        Handler.addSyntacticUnit(funcRParams);
+        return funcRParams;
     }
 
     public MulExp parseMulExp() {
@@ -726,12 +779,13 @@ public class Parser {
         unaryExps.add(parseUnaryExp());
         while (lexer.lookCurrent(TokenType.MULT) || lexer.lookCurrent(TokenType.DIV) || lexer.lookCurrent(TokenType.MOD)) {
             ops.add(lexer.peek());
-            Handler.addOutputInfo("<MulExp>");
+            Handler.addSyntacticUnit(new MulExp(unaryExps, ops)); // Add intermediate MulExp for each op
             lexer.next();
             unaryExps.add(parseUnaryExp());
         }
-        Handler.addOutputInfo("<MulExp>");
-        return new MulExp(unaryExps, ops);
+        MulExp mulExp = new MulExp(unaryExps, ops);
+        Handler.addSyntacticUnit(mulExp);
+        return mulExp;
     }
 
     public AddExp parseAddExp() {
@@ -742,12 +796,13 @@ public class Parser {
         mulExps.add(parseMulExp());
         while (lexer.lookCurrent(TokenType.PLUS) || lexer.lookCurrent(TokenType.MINU)) {
             ops.add(lexer.peek());
-            Handler.addOutputInfo("<AddExp>");
+            Handler.addSyntacticUnit(new AddExp(mulExps, ops)); // Add intermediate AddExp for each op
             lexer.next();
             mulExps.add(parseMulExp());
         }
-        Handler.addOutputInfo("<AddExp>");
-        return new AddExp(mulExps, ops);
+        AddExp addExp = new AddExp(mulExps, ops);
+        Handler.addSyntacticUnit(addExp);
+        return addExp;
     }
 
     public RelExp parseRelExp() {
@@ -759,13 +814,13 @@ public class Parser {
         while (lexer.lookCurrent(TokenType.LSS) || lexer.lookCurrent(TokenType.LEQ) || lexer.lookCurrent(TokenType.GRE)
                 || lexer.lookCurrent(TokenType.GEQ)) {
             ops.add(lexer.peek());
-            Handler.addOutputInfo("<RelExp>");
+            Handler.addSyntacticUnit(new RelExp(addExps, ops)); // Add intermediate RelExp for each op
             lexer.next();
             addExps.add(parseAddExp());
         }
-        Handler.addOutputInfo("<RelExp>");
-        return new RelExp(addExps, ops);
-
+        RelExp relExp = new RelExp(addExps, ops);
+        Handler.addSyntacticUnit(relExp);
+        return relExp;
     }
 
     public EqExp parseEqExp() {
@@ -776,12 +831,13 @@ public class Parser {
         relExps.add(parseRelExp());
         while (lexer.lookCurrent(TokenType.EQL) || lexer.lookCurrent(TokenType.NEQ)) {
             ops.add(lexer.peek());
-            Handler.addOutputInfo("<EqExp>");
+            Handler.addSyntacticUnit(new EqExp(relExps, ops)); // Add intermediate EqExp for each op
             lexer.next();
             relExps.add(parseRelExp());
         }
-        Handler.addOutputInfo("<EqExp>");
-        return new EqExp(relExps, ops);
+        EqExp eqExp = new EqExp(relExps, ops);
+        Handler.addSyntacticUnit(eqExp);
+        return eqExp;
     }
 
     public LAndExp parseLAndExp() {
@@ -789,12 +845,13 @@ public class Parser {
         ArrayList<EqExp> eqExps = new ArrayList<>();
         eqExps.add(parseEqExp());
         while (lexer.lookCurrent(TokenType.AND)) {
-            Handler.addOutputInfo("<LAndExp>");
+            Handler.addSyntacticUnit(new LAndExp(eqExps)); // Add intermediate LAndExp for each op
             lexer.next();
             eqExps.add(parseEqExp());
         }
-        Handler.addOutputInfo("<LAndExp>");
-        return new LAndExp(eqExps);
+        LAndExp lAndExp = new LAndExp(eqExps);
+        Handler.addSyntacticUnit(lAndExp);
+        return lAndExp;
     }
 
     public LOrExp parseLOrExp() {
@@ -802,20 +859,23 @@ public class Parser {
         ArrayList<LAndExp> lAndExps = new ArrayList<>();
         lAndExps.add(parseLAndExp());
         while (lexer.lookCurrent(TokenType.OR)) {
-            Handler.addOutputInfo("<LOrExp>");
+            Handler.addSyntacticUnit(new LOrExp(lAndExps)); // Add intermediate LOrExp for each op
             lexer.next();
             lAndExps.add(parseLAndExp());
         }
-        Handler.addOutputInfo("<LOrExp>");
-        return new LOrExp(lAndExps);
+        LOrExp lOrExp = new LOrExp(lAndExps);
+        Handler.addSyntacticUnit(lOrExp);
+        return lOrExp;
     }
 
     public ConstExp parseConstExp() {
         // ConstExp → AddExp [note: Ident used must be constant]
         AddExp addExp = parseAddExp();
-        Handler.addOutputInfo("<ConstExp>");
-        return new ConstExp(addExp);
+        ConstExp constExp = new ConstExp(addExp);
+        Handler.addSyntacticUnit(constExp);
+        return constExp;
     }
+
 }
 
 

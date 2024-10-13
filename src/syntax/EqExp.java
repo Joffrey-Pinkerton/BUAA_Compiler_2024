@@ -5,7 +5,8 @@ import lexicon.Token;
 import java.util.ArrayList;
 
 //  EqExp → RelExp | EqExp ('==' | '!=') RelExp
-public class EqExp implements Unit{
+public class EqExp implements Unit {
+    private static final UnitType type = UnitType.EQ_EXP;
     private final ArrayList<RelExp> relExps = new ArrayList<>();
     private final ArrayList<Token> operators = new ArrayList<>();
 
@@ -23,5 +24,10 @@ public class EqExp implements Unit{
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

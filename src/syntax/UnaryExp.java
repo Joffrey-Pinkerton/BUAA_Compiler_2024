@@ -2,6 +2,7 @@ package syntax;
 
 // UnaryExp → PrimaryExp | Ident '(' [FuncRParams] ')' | UnaryOp UnaryExp // j
 public class UnaryExp implements Unit{
+    private static final UnitType type = UnitType.UNARY_EXP;
     private final PrimaryExp primaryExp;
     private final String ident;
     private final FuncRParams funcRParams;
@@ -41,5 +42,10 @@ public class UnaryExp implements Unit{
         } else {
             return unaryOp.toString() + unaryExp.toString();
         }
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

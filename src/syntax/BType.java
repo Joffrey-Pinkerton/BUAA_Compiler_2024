@@ -2,6 +2,7 @@ package syntax;
 
 // BType → 'int' | 'char'
 public class BType implements Unit{
+    private static final UnitType type = UnitType.B_TYPE;
     private final String btype;
 
     public BType(String btype) {
@@ -10,5 +11,10 @@ public class BType implements Unit{
 
     public String toString() {
         return btype;
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

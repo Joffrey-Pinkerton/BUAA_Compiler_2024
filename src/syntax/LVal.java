@@ -1,9 +1,10 @@
 package syntax;
 
 //  LVal → Ident ['[' Exp ']'] // k
-public class LVal implements Unit{
-    public String ident;
-    public Exp exp;
+public class LVal implements Unit {
+    private static final UnitType type = UnitType.L_VAL;
+    private final String ident;
+    private final Exp exp;
 
     public LVal(String ident) {
         this.ident = ident;
@@ -17,5 +18,10 @@ public class LVal implements Unit{
 
     public String toString() {
         return ident + (exp == null ? "" : "[" + exp + "]");
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

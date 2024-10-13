@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 // FuncRParams → Exp { ',' Exp }
 public class FuncRParams implements Unit{
+    private static final UnitType type = UnitType.FUNC_R_PARAMS;
     private final ArrayList<Exp> exps = new ArrayList<>();
 
     public FuncRParams(ArrayList<Exp> exps) {
@@ -18,5 +19,10 @@ public class FuncRParams implements Unit{
         }
         sb.delete(sb.length() - 2, sb.length());
         return sb.toString();
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

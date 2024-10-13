@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 // RelExp → AddExp | RelExp ('<' | '>' | '<=' | '>=') AddExp
 public class RelExp implements Unit{
+    private static final UnitType type = UnitType.REL_EXP;
     private final ArrayList<AddExp> addExps = new ArrayList<>();
     private final ArrayList<Token> relops = new ArrayList<>();
 
@@ -23,5 +24,10 @@ public class RelExp implements Unit{
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }

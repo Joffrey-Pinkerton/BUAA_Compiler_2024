@@ -1,11 +1,12 @@
 package syntax;
 
-import exception.UnexpectedErrorException;
+import exception.unclassified.UnexpectedErrorException;
 
 import java.util.ArrayList;
 
 // LOrExp → LAndExp | LOrExp '||' LAndExp
 public class LOrExp implements Unit{
+    private static final UnitType type = UnitType.L_OR_EXP;
     private final ArrayList<LAndExp> lAndExps = new ArrayList<>();
 
     public LOrExp(ArrayList<LAndExp> eqExps) {
@@ -23,5 +24,10 @@ public class LOrExp implements Unit{
         }
         sb.delete(sb.length() - 4, sb.length());
         return sb.toString();
+    }
+
+    @Override
+    public UnitType getType() {
+        return type;
     }
 }
