@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 // Block → '{' { BlockItem } '}'
 public class Block implements Unit {
+    private static final UnitType type = UnitType.BLOCK;
     private final ArrayList<BlockItem> blockItems = new ArrayList<>();
 
     public Block(ArrayList<BlockItem> blockItems) {

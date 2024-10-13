@@ -2,7 +2,8 @@ package syntax;
 
 // ConstExp → AddExp [note: Ident used must be constant]
 public class ConstExp implements Unit{
-    public final AddExp addExp;
+    private static final UnitType type = UnitType.CONST_EXP;
+    private final AddExp addExp;
 
     public ConstExp(AddExp addExp) {
         this.addExp = addExp;

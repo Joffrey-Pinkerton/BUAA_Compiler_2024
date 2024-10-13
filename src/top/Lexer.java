@@ -1,7 +1,7 @@
 package top;
 
 import exception.UnexpectedErrorException;
-import exception.IllegalTokenException;
+import exception.classified.IllegalIdentifierException;
 import lexicon.Token;
 import lexicon.TokenType;
 
@@ -152,8 +152,8 @@ public class Lexer {
 
     private void handleSingleAndOr(String op) {
         try {
-            throw new IllegalTokenException("Unrecognized token", lineIndex + 1);
-        } catch (IllegalTokenException e) {
+            throw new IllegalIdentifierException("Unrecognized token", lineIndex + 1);
+        } catch (IllegalIdentifierException e) {
             curPos++;
             curToken = new Token(op.equals("&") ? TokenType.AND : TokenType.OR, op, lineIndex + 1);
         }
@@ -162,7 +162,7 @@ public class Lexer {
     public void next() {
         if (curToken != null) {
             lastToken = curToken;
-            Handler.addToken(curToken);
+            Handler.addSyntacticUnit(curToken);
         }
         while (curPos < source.length()) {
             char ch = source.charAt(curPos);
@@ -216,7 +216,7 @@ public class Lexer {
     }
 
     public boolean lookCurrent(TokenType type) {
-        return curToken.getType().equals(type);
+        return curToken.getTokenType().equals(type);
     }
 
     public boolean lookAhead(TokenType type) {
@@ -231,9 +231,9 @@ public class Lexer {
         lineIndex = line;
         curToken = token;
 
-        Handler.popToken();
+        Handler.popSyntacticUnit();
 
-        return nextToken.getType().equals(type);
+        return nextToken.getTokenType().equals(type);
     }
 
     public boolean lookDoubleAhead(TokenType type) {
@@ -249,10 +249,10 @@ public class Lexer {
         lineIndex = line;
         curToken = token;
 
-        Handler.popToken();
-        Handler.popToken();
+        Handler.popSyntacticUnit();
+        Handler.popSyntacticUnit();
 
-        return next2Token.getType().equals(type);
+        return next2Token.getTokenType().equals(type);
     }
 
     public void save() {

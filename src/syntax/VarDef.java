@@ -1,7 +1,8 @@
 package syntax;
 
 // VarDef → Ident [ '[' ConstExp ']' ] | Ident [ '[' ConstExp ']' ] '=' InitVal // k
-public class VarDef implements Unit{
+public class VarDef implements Unit {
+    private static final UnitType type = UnitType.VAR_DEF;
     private final String ident;
     private final ConstExp constExp;
     private final InitVal initVal;

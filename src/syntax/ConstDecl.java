@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 // ConstDecl → 'const' BType ConstDef { ',' ConstDef } ';' // i
 public class ConstDecl implements Unit{
+    private static final UnitType type = UnitType.CONST_DECL;
     private final BType btype;
     private final ArrayList<ConstDef> constDefs = new ArrayList<>();
 

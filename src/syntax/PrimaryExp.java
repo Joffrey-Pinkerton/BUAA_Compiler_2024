@@ -4,8 +4,8 @@ package syntax;
 public class PrimaryExp implements Unit{
     private final Exp exp;
     private final LVal lval;
-    private final Num number;
-    private final Char character;
+    private final Number number;
+    private final Character character;
 
     public PrimaryExp(Exp exp) {
         this.exp = exp;
@@ -21,14 +21,14 @@ public class PrimaryExp implements Unit{
         this.character = null;
     }
 
-    public PrimaryExp(Num number) {
+    public PrimaryExp(Number number) {
         this.exp = null;
         this.lval = null;
         this.number = number;
         this.character = null;
     }
 
-    public PrimaryExp(Char character) {
+    public PrimaryExp(Character character) {
         this.exp = null;
         this.lval = null;
         this.number = null;

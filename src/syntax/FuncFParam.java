@@ -1,7 +1,8 @@
 package syntax;
 
 // FuncFParam → BType Ident ['[' ']'] // k
-public class FuncFParam implements Unit{
+public class FuncFParam implements Unit {
+    private static final UnitType type = UnitType.FUNC_F_PARAM;
     public BType bType;
     public String ident;
     public boolean isArray;

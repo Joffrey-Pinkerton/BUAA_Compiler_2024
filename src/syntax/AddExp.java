@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 // AddExp → MulExp | AddExp ('+' | '−') MulExp
 public class AddExp implements Unit {
+    private static final UnitType type = UnitType.ADD_EXP;
     private final ArrayList<MulExp> mulExps = new ArrayList<>();
     private final ArrayList<Token> operators = new ArrayList<>();
 

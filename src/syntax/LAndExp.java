@@ -5,7 +5,8 @@ import exception.UnexpectedErrorException;
 import java.util.ArrayList;
 
 // LAndExp → EqExp | LAndExp '&&' EqExp
-public class LAndExp implements Unit{
+public class LAndExp implements Unit {
+    private static final UnitType type = UnitType.L_AND_EXP;
     private final ArrayList<EqExp> eqExps = new ArrayList<>();
 
     public LAndExp(ArrayList<EqExp> eqExps) {

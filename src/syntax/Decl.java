@@ -3,9 +3,10 @@ package syntax;
 import exception.UnexpectedErrorException;
 
 // Decl → ConstDecl | VarDecl
-public class Decl implements Unit{
-    public final ConstDecl constDecl;
-    public final VarDecl varDecl;
+public class Decl implements Unit {
+    private static final UnitType type = UnitType.DECL;
+    private final ConstDecl constDecl;
+    private final VarDecl varDecl;
 
     public Decl(ConstDecl constDecl) {
         this.constDecl = constDecl;

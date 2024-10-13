@@ -1,5 +1,11 @@
 package syntax;
 
 public interface Unit {
-    public String toString();
+    UnitType type = null;
+
+    String toString();
+
+    default UnitType getType() {
+        return type;
+    }
 }

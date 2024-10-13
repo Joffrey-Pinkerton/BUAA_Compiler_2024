@@ -1,7 +1,8 @@
 package syntax;
 
 // ForStmt → LVal '=' Exp
-public class ForStmt implements Unit{
+public class ForStmt implements Unit {
+    private static final UnitType type = UnitType.FOR_STMT;
     private final LVal lval;
     private final Exp exp;
 

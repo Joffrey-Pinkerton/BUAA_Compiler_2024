@@ -15,20 +15,21 @@ import java.util.ArrayList;
 //        | LVal '=' 'getchar''('')'';' // i j
 //        | 'printf''('StringConst {','Exp}')'';' // i j
 public class Stmt implements Unit {
-    private final StmtType type;
+    private static final UnitType type = UnitType.STMT;
+    private final StmtType stmtType;
     private final ArrayList<Unit> keyParts = new ArrayList<>();
 
-    public Stmt(StmtType type) {
-        this.type = type;
+    public Stmt(StmtType stmtType) {
+        this.stmtType = stmtType;
     }
 
-    public Stmt(StmtType type, ArrayList<Unit> keyParts) {
-        this.type = type;
+    public Stmt(StmtType stmtType, ArrayList<Unit> keyParts) {
+        this.stmtType = stmtType;
         this.keyParts.addAll(keyParts);
     }
 
     public String toString() {
-        switch (type) {
+        switch (stmtType) {
             case EMPTY:
                 return ";";
             case ASSIGN:
@@ -65,7 +66,7 @@ public class Stmt implements Unit {
                 sb.append(");");
                 return sb.toString();
             default:
-                throw new UnexpectedErrorException("Unexpected StmtType: " + type);
+                throw new UnexpectedErrorException("Unexpected StmtType: " + stmtType);
         }
     }
 }

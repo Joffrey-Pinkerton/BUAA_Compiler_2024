@@ -3,7 +3,8 @@ package syntax;
 import java.util.ArrayList;
 
 // InitVal → Exp | '{' [ Exp { ',' Exp } ] '}' | StringConst
-public class InitVal implements Unit{
+public class InitVal implements Unit {
+    private static final UnitType type = UnitType.INIT_VAL;
     private final Exp exp;
     private final ArrayList<Exp> exps = new ArrayList<>();
     private final String stringConst;

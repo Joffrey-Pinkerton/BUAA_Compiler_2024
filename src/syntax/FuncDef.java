@@ -1,7 +1,8 @@
 package syntax;
 
 // FuncDef → FuncType Ident '(' [FuncFParams] ')' Block // j
-public class FuncDef implements Unit{
+public class FuncDef implements Unit {
+    private static final UnitType type = UnitType.FUNC_DEF;
     private final FuncType funcType;
     private final String ident;
     private final FuncFParams funcFParams;
