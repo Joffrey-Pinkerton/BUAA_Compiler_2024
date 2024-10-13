@@ -33,3 +33,4 @@ bin/
 **/*.txt
 **/*.py
 **/*.json
+**/META-INF/
