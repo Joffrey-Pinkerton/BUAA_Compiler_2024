@@ -1,6 +1,6 @@
-package output;
+package top;
 
-import exceptions.ErrorInfo;
+import exception.ErrorInfo;
 import lexicon.Token;
 
 import java.io.BufferedWriter;

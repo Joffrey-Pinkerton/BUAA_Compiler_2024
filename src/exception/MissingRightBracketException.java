@@ -1,6 +1,6 @@
-package exceptions;
+package exception;
 
-import output.Handler;
+import top.Handler;
 
 public class MissingRightBracketException extends RuntimeException {
     public MissingRightBracketException(String message, int lineNum) {

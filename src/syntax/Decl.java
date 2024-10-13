@@ -1,6 +1,6 @@
 package syntax;
 
-import exceptions.UnexpectedErrorException;
+import exception.UnexpectedErrorException;
 
 // Decl → ConstDecl | VarDecl
 public class Decl implements Unit{

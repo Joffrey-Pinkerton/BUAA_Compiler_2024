@@ -1,6 +1,6 @@
-package exceptions;
+package exception;
 
-import output.Handler;
+import top.Handler;
 
 public class MissingSemicolonException extends RuntimeException {
     public MissingSemicolonException(String message, int lineNum) {

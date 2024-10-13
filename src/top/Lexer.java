@@ -1,8 +1,9 @@
-import exceptions.UnexpectedErrorException;
-import exceptions.UnrecognizedTokenException;
+package top;
+
+import exception.UnexpectedErrorException;
+import exception.IllegalTokenException;
 import lexicon.Token;
 import lexicon.TokenType;
-import output.Handler;
 
 public class Lexer {
     private final String source;
@@ -151,8 +152,8 @@ public class Lexer {
 
     private void handleSingleAndOr(String op) {
         try {
-            throw new UnrecognizedTokenException("Unrecognized token", lineIndex + 1);
-        } catch (UnrecognizedTokenException e) {
+            throw new IllegalTokenException("Unrecognized token", lineIndex + 1);
+        } catch (IllegalTokenException e) {
             curPos++;
             curToken = new Token(op.equals("&") ? TokenType.AND : TokenType.OR, op, lineIndex + 1);
         }

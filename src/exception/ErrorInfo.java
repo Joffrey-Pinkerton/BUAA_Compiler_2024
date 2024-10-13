@@ -1,4 +1,4 @@
-package exceptions;
+package exception;
 
 public class ErrorInfo {
     private final int lineNum;

@@ -1,4 +1,4 @@
-package exceptions;
+package exception;
 
 public enum ErrorCode {
     A, B, C, D, E, F, G, H, I, J, K;

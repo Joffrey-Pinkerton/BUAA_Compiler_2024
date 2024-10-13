@@ -1,4 +1,4 @@
-import output.Handler;
+package top;
 
 import java.io.IOException;
 import java.nio.file.Files;

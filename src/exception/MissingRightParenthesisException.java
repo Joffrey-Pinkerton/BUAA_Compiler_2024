@@ -1,6 +1,6 @@
-package exceptions;
+package exception;
 
-import output.Handler;
+import top.Handler;
 
 public class MissingRightParenthesisException extends RuntimeException {
     public MissingRightParenthesisException(String message, int lineNum) {

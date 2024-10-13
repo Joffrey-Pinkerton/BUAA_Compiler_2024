@@ -1,6 +1,6 @@
 package syntax;
 
-import exceptions.UnexpectedErrorException;
+import exception.UnexpectedErrorException;
 
 import java.util.ArrayList;
 

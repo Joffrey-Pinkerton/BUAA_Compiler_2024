@@ -1,10 +1,11 @@
-import exceptions.MissingRightBracketException;
-import exceptions.MissingRightParenthesisException;
-import exceptions.MissingSemicolonException;
-import exceptions.SyntaxErrorException;
+package top;
+
+import exception.MissingRightBracketException;
+import exception.MissingRightParenthesisException;
+import exception.MissingSemicolonException;
+import exception.SyntaxErrorException;
 import lexicon.Token;
 import lexicon.TokenType;
-import output.Handler;
 import syntax.*;
 
 import java.util.ArrayList;
