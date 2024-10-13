@@ -141,7 +141,6 @@ public class Lexer {
             curPos++;
             curToken = new Token(TokenType.getOperator(op), op, lineIndex + 1);
         } else {
-            handleSingleAndOr(op);
             if (op.equals("&") || op.equals("|")) {
                 handleSingleAndOr(op);
             } else {

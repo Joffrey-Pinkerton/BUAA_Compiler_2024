@@ -217,17 +217,20 @@ public class Parser {
             throw new SyntaxErrorException("Expect '(', but get " + lexer.peek());
         }
         lexer.next();
-        if (lexer.lookCurrent(TokenType.RPARENT)) {
-            lexer.next();
+
+
+        if (lexer.lookCurrent(TokenType.INTTK) || lexer.lookCurrent(TokenType.CHARTK)) {
+            FuncFParams funcFParams = parseFuncFParams();
+            checkRightParenthesisAndPass();
+            Block block = parseBlock();
+            Handler.addOutputInfo("<FuncDef>");
+            return new FuncDef(funcType, funcName, funcFParams, block);
+        } else {
+            checkRightParenthesisAndPass();
             Block block = parseBlock();
             Handler.addOutputInfo("<FuncDef>");
             return new FuncDef(funcType, funcName, new FuncFParams(new ArrayList<>()), block);
         }
-        FuncFParams funcFParams = parseFuncFParams();
-        checkRightParenthesisAndPass();
-        Block block = parseBlock();
-        Handler.addOutputInfo("<FuncDef>");
-        return new FuncDef(funcType, funcName, funcFParams, block);
     }
 
     public FuncType parseFuncType() {
@@ -330,10 +333,7 @@ public class Parser {
         lexer.next();
         Cond cond = parseCond();
         units.add(cond);
-        if (!lexer.lookCurrent(TokenType.RPARENT)) {
-            throw new SyntaxErrorException("Expect ')', but get " + lexer.peek());
-        }
-        lexer.next();
+        checkRightParenthesisAndPass();
         Stmt thenStmt = parseStmt();
         units.add(thenStmt);
 
@@ -660,15 +660,18 @@ public class Parser {
             String ident = lexer.peek().getValue();
             lexer.next();
             lexer.next();
-            if (lexer.lookCurrent(TokenType.RPARENT)) {
-                lexer.next();
+            if (lexer.lookCurrent(TokenType.PLUS) || lexer.lookCurrent(TokenType.MINU) || lexer.lookCurrent(TokenType.NOT) ||
+                    lexer.lookCurrent(TokenType.INTCON) || lexer.lookCurrent(TokenType.CHRCON) || lexer.lookCurrent(TokenType.LPARENT) ||
+                    lexer.lookCurrent(TokenType.IDENFR)) {
+                FuncRParams funcRParams = parseFuncRParams();
+                checkRightParenthesisAndPass();
+                Handler.addOutputInfo("<UnaryExp>");
+                return new UnaryExp(ident, funcRParams);
+            } else {
+                checkRightParenthesisAndPass();
                 Handler.addOutputInfo("<UnaryExp>");
                 return new UnaryExp(ident, null);
             }
-            FuncRParams funcRParams = parseFuncRParams();
-            checkRightParenthesisAndPass();
-            Handler.addOutputInfo("<UnaryExp>");
-            return new UnaryExp(ident, funcRParams);
         } else if (lexer.lookCurrent(TokenType.PLUS) || lexer.lookCurrent(TokenType.MINU) || lexer.lookCurrent(TokenType.NOT)) {
             UnaryOp unaryOp = parseUnaryOp();
             UnaryExp unaryExp = parseUnaryExp();
