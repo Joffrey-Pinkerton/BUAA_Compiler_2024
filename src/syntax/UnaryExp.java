@@ -1,7 +1,7 @@
 package syntax;
 
 // UnaryExp → PrimaryExp | Ident '(' [FuncRParams] ')' | UnaryOp UnaryExp // j
-public class UnaryExp implements Unit{
+public class UnaryExp implements Unit {
     private static final UnitType type = UnitType.UNARY_EXP;
     private final PrimaryExp primaryExp;
     private final String ident;
@@ -39,8 +39,10 @@ public class UnaryExp implements Unit{
             return primaryExp.toString();
         } else if (ident != null) {
             return ident + "(" + (funcRParams != null ? funcRParams.toString() : "") + ")";
+        } else if (unaryOp != null && unaryExp != null) {
+            return unaryOp + unaryExp.toString();
         } else {
-            return unaryOp.toString() + unaryExp.toString();
+            throw new RuntimeException("All fields are null");
         }
     }
 

@@ -1,7 +1,5 @@
-package exception.classified;
+package exception;
 
-import exception.ErrorCode;
-import exception.ErrorInfo;
 import core.Handler;
 
 public class MissingReturnException extends RuntimeException {

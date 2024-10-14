@@ -1,11 +1,9 @@
 package syntax;
 
-import exception.unclassified.UnexpectedErrorException;
-
 import java.util.ArrayList;
 
 // LOrExp → LAndExp | LOrExp '||' LAndExp
-public class LOrExp implements Unit{
+public class LOrExp implements Unit {
     private static final UnitType type = UnitType.L_OR_EXP;
     private final ArrayList<LAndExp> lAndExps = new ArrayList<>();
 
@@ -15,7 +13,7 @@ public class LOrExp implements Unit{
 
     public String toString() {
         if (lAndExps.isEmpty()) {
-            throw new UnexpectedErrorException("Empty LOrExp");
+            throw new RuntimeException("Empty LOrExp");
         }
         StringBuilder sb = new StringBuilder();
         for (LAndExp lAndExp : lAndExps) {

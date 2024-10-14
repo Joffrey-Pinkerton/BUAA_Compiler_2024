@@ -1,7 +1,5 @@
 package syntax;
 
-import exception.unclassified.UnexpectedErrorException;
-
 import java.util.ArrayList;
 
 // LAndExp → EqExp | LAndExp '&&' EqExp
@@ -15,7 +13,7 @@ public class LAndExp implements Unit {
 
     public String toString() {
         if (eqExps.isEmpty()) {
-            throw new UnexpectedErrorException("Empty LAndExp");
+            throw new RuntimeException("Empty LAndExp");
         }
         StringBuilder sb = new StringBuilder();
         for (EqExp eqExp : eqExps) {

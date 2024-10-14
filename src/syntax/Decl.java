@@ -1,7 +1,5 @@
 package syntax;
 
-import exception.unclassified.UnexpectedErrorException;
-
 // Decl → ConstDecl | VarDecl
 public class Decl implements Unit {
     private static final UnitType type = UnitType.DECL;
@@ -20,7 +18,7 @@ public class Decl implements Unit {
 
     public String toString() {
         if (constDecl == null && varDecl == null) {
-            throw new UnexpectedErrorException("ConstDecl or VarDecl expected");
+            throw new RuntimeException("ConstDecl or VarDecl expected");
         }
         return constDecl != null ? constDecl.toString() : varDecl.toString();
     }

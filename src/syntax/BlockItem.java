@@ -17,6 +17,9 @@ public class BlockItem implements Unit {
     }
 
     public String toString() {
+        if (decl == null && stmt == null) {
+            throw new RuntimeException("Both decl and stmt are null");
+        }
         if (decl != null) {
             return decl.toString();
         } else {

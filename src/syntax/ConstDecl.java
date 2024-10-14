@@ -1,7 +1,5 @@
 package syntax;
 
-import exception.unclassified.UnexpectedErrorException;
-
 import java.util.ArrayList;
 
 // ConstDecl → 'const' BType ConstDef { ',' ConstDef } ';' // i
@@ -18,7 +16,7 @@ public class ConstDecl implements Unit{
     public String toString() {
         StringBuilder constDefsString = new StringBuilder();
         if (constDefs.isEmpty()) {
-            throw new UnexpectedErrorException("ConstDecl should have at least one ConstDef");
+            throw new RuntimeException("ConstDecl should have at least one ConstDef");
         } else if (constDefs.size() > 1) {
             constDefsString.append(constDefs.get(0));
         } else {

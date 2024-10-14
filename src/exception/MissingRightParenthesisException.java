@@ -1,8 +1,6 @@
-package exception.classified;
+package exception;
 
 import core.Handler;
-import exception.ErrorInfo;
-import exception.ErrorCode;
 
 public class MissingRightParenthesisException extends RuntimeException {
     public MissingRightParenthesisException(String message, int lineNum) {

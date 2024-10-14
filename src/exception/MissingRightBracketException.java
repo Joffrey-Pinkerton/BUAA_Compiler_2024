@@ -1,8 +1,6 @@
-package exception.classified;
+package exception;
 
 import core.Handler;
-import exception.ErrorCode;
-import exception.ErrorInfo;
 
 public class MissingRightBracketException extends RuntimeException {
     public MissingRightBracketException(String message, int lineNum) {

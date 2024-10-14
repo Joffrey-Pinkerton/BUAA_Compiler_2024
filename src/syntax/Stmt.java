@@ -1,7 +1,5 @@
 package syntax;
 
-import exception.unclassified.UnexpectedErrorException;
-
 import java.util.ArrayList;
 
 //Stmt → LVal '=' Exp ';' // i
@@ -66,7 +64,7 @@ public class Stmt implements Unit {
                 sb.append(");");
                 return sb.toString();
             default:
-                throw new UnexpectedErrorException("Unexpected StmtType: " + stmtType);
+                throw new RuntimeException("Unexpected StmtType: " + stmtType);
         }
     }
 

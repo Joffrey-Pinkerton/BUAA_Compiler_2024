@@ -17,5 +17,4 @@ public class Cond implements Unit {
     public UnitType getType() {
         return type;
     }
-
 }

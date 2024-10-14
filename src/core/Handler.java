@@ -43,7 +43,7 @@ public class Handler {
             BufferedWriter bw = new BufferedWriter(new FileWriter("parser.txt"));
 
             for (Unit unit : unitStack) {
-                String output = unit instanceof Token ? (((Token) unit).getTokenType() + " " + unit) : unit.getType().toString();
+                String output = unit instanceof Token ? (((Token) unit).tokenType() + " " + unit) : unit.getType().toString();
                 bw.write(output + "\n");
             }
             bw.flush();

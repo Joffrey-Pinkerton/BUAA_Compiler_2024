@@ -38,13 +38,15 @@ public class PrimaryExp implements Unit {
 
     public String toString() {
         if (exp != null) {
-            return "(" + exp.toString() + ")";
+            return "(" + exp + ")";
         } else if (lval != null) {
             return lval.toString();
         } else if (number != null) {
             return number.toString();
-        } else {
+        } else if (character != null) {
             return character.toString();
+        } else {
+            throw new RuntimeException("All fields are null");
         }
     }
 
