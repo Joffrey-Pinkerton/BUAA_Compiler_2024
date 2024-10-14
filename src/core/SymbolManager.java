@@ -65,7 +65,7 @@ public class SymbolManager {
             if (symbol == null) {
                 throw new UndefinedIdentifierException("Undefined identifier " + name, lineNum);
             }
-        } catch (RedefinitionException ignored) {
+        } catch (UndefinedIdentifierException ignored) {
         }
         return symbol;
     }

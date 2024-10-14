@@ -258,12 +258,12 @@ public class Parser {
         }
         checkRightParenthesisAndPass();
 
-        Block block = parseBlock(false, funcType.isVoid(), funcType.isInt() || funcType.isChar());
-        FuncDef funcDef = new FuncDef(funcType, funcName, funcFParams, block);
-
         SymbolType type = funcType.isVoid() ? SymbolType.VOID_FUNC : funcType.isInt() ? SymbolType.INT_FUNC : SymbolType.CHAR_FUNC;
         Symbol symbol = Symbol.createFuncSymbol(type, funcName, symbolManager.getScopeId(), funcFParams);
         symbolManager.registerSymbol(symbol, lineNum);
+
+        Block block = parseBlock(false, funcType.isVoid(), funcType.isInt() || funcType.isChar());
+        FuncDef funcDef = new FuncDef(funcType, funcName, funcFParams, block);
         // Handler.addSyntacticUnit(funcDef);
         return funcDef;
     }

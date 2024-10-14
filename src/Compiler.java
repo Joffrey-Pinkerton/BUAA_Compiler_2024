@@ -1,4 +1,7 @@
-package core;
+import core.Handler;
+import core.Lexer;
+import core.Parser;
+import core.SymbolManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
