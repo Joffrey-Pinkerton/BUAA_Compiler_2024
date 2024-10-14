@@ -474,7 +474,7 @@ public class Parser {
         try {
             int argNum = ((Token) (units.get(0))).value().split("%[cd]").length - 1;
             if (argNum != units.size() - 1) {
-                throw new PrintFormatMismatchException("The number of arguments does not match the format string", lexer.getLineNum());
+                throw new PrintFormatMismatchException("The number of arguments does not match the format string", lineNum);
             }
         } catch (PrintFormatMismatchException ignored) {
         }
@@ -517,16 +517,7 @@ public class Parser {
             Handler.restore();
             units.clear();
 
-            String ident = lexer.peek().value();
-            int lineNum = lexer.getLineNum();
-            LVal lVal = parseLVal();
-            Symbol symbol = SymbolManager.useSymbol(ident, lineNum);
-            try {
-                if (symbol != null && symbol.isConstType()) {
-                    throw new ImmutableConstantException("Trying to assign to a constant variable", lineNum);
-                }
-            } catch (ImmutableConstantException ignored) {
-            }
+            LVal lVal = parseLValAndCheckConst();
             units.add(lVal);
             if (!lexer.lookCurrent(TokenType.ASSIGN)) {
                 throw new RuntimeException("Expect '=', but get " + lexer.peek());
@@ -553,7 +544,6 @@ public class Parser {
             }
         }
     }
-
 
     private Stmt parseStmtBlock(boolean inLoop, boolean checkVoid) {
         Block block = parseBlock(inLoop, checkVoid, false);
@@ -660,9 +650,7 @@ public class Parser {
 
     public ForStmt parseForStmt() {
         // ForStmt → LVal '=' Exp
-        int lineNum = lexer.getLineNum();
-        String ident = lexer.peek().value();
-        LVal lVal = parseLVal();
+        LVal lVal = parseLValAndCheckConst();
         if (!lexer.lookCurrent(TokenType.ASSIGN)) {
             throw new RuntimeException("Expect '=', but get " + lexer.peek());
         }
@@ -671,6 +659,20 @@ public class Parser {
         ForStmt forStmt = new ForStmt(lVal, exp);
         // Handler.addSyntacticUnit(forStmt);
         return forStmt;
+    }
+
+    private LVal parseLValAndCheckConst() {
+        String ident = lexer.peek().value();
+        int lineNum = lexer.getLineNum();
+        LVal lVal = parseLVal();
+        Symbol symbol = SymbolManager.useSymbol(ident, lineNum);
+        try {
+            if (symbol != null && symbol.isConstType()) {
+                throw new ImmutableConstantException("Trying to assign to a constant variable", lineNum);
+            }
+        } catch (ImmutableConstantException ignored) {
+        }
+        return lVal;
     }
 
     public Exp parseExp() {
