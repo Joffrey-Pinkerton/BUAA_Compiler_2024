@@ -13,12 +13,6 @@ public class VarDef implements Unit {
         this.initVal = initVal;
     }
 
-    public VarDef(String ident, ConstExp constExp) {
-        this.ident = ident;
-        this.constExp = constExp;
-        this.initVal = null;
-    }
-
     public String toString() {
         if (initVal == null) {
             return ident + (constExp == null ? "" : "[" + constExp + "]");

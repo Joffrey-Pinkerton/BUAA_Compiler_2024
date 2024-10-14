@@ -72,4 +72,8 @@ public class Stmt implements Unit {
     public UnitType getType() {
         return type;
     }
+
+    public StmtType getStmtType() {
+        return stmtType;
+    }
 }

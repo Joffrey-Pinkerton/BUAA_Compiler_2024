@@ -17,4 +17,24 @@ public class FuncType implements Unit {
     public UnitType getType() {
         return type;
     }
+
+    public boolean isVoid() {
+        return funcType.equals("void");
+    }
+
+    public boolean isChar() {
+        return funcType.equals("char");
+    }
+
+    public boolean isInt() {
+        return funcType.equals("int");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof FuncType) {
+            return funcType.equals(((FuncType) obj).funcType);
+        }
+        return false;
+    }
 }

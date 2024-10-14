@@ -7,6 +7,9 @@ public class SymbolTable {
     private final SymbolTable prevTable;
     private final HashMap<String, Symbol> dictionary;
 
+    public int getScopeId() {
+        return id;
+    }
 
     public SymbolTable(int id, SymbolTable prevTable) {
         this.id = id;

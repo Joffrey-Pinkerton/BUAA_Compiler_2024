@@ -31,4 +31,8 @@ public class BlockItem implements Unit {
     public UnitType getType() {
         return type;
     }
+
+    public boolean isReturnStmt() {
+        return stmt != null && stmt.getStmtType().equals(StmtType.RETURN);
+    }
 }

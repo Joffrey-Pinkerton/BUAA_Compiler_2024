@@ -19,6 +19,10 @@ public class ConstDef implements Unit {
         this.constInitVal = constInitVal;
     }
 
+    public String getIdent() {
+        return ident;
+    }
+
     public String toString() {
         return ident + (constExp == null ? "" : "[" + constExp + "]") + " = " + constInitVal;
     }

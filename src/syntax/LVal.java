@@ -6,11 +6,6 @@ public class LVal implements Unit {
     private final String ident;
     private final Exp exp;
 
-    public LVal(String ident) {
-        this.ident = ident;
-        this.exp = null;
-    }
-
     public LVal(String ident, Exp exp) {
         this.ident = ident;
         this.exp = exp;
@@ -23,5 +18,9 @@ public class LVal implements Unit {
     @Override
     public UnitType getType() {
         return type;
+    }
+
+    public String getIdent() {
+        return ident;
     }
 }

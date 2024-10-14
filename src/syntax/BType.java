@@ -1,7 +1,7 @@
 package syntax;
 
 // BType → 'int' | 'char'
-public class BType implements Unit{
+public class BType implements Unit {
     private static final UnitType type = UnitType.B_TYPE;
     private final String btype;
 
@@ -16,5 +16,13 @@ public class BType implements Unit{
     @Override
     public UnitType getType() {
         return type;
+    }
+
+    public boolean isChar() {
+        return btype.equals("char");
+    }
+
+    public boolean isInt() {
+        return btype.equals("int");
     }
 }
