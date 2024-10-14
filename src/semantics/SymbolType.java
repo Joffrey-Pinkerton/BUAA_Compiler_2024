@@ -35,5 +35,18 @@ public enum SymbolType {
     public String toString() {
         return getTypeName.get(this);
     }
+
+    public boolean isArray() {
+        return this == CHAR_ARRAY || this == INT_ARRAY || this == CONST_CHAR_ARRAY || this == CONST_INT_ARRAY;
+    }
+
+    public boolean isCharArray() {
+        return this == CHAR_ARRAY || this == CONST_CHAR_ARRAY;
+    }
+
+    public boolean isIntArray() {
+        return this == INT_ARRAY || this == CONST_INT_ARRAY;
+    }
+
 }
 

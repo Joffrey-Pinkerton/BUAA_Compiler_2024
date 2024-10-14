@@ -3,7 +3,7 @@ package syntax;
 import java.util.ArrayList;
 
 // FuncFParams → FuncFParam { ',' FuncFParam }
-public class FuncFParams implements Unit{
+public class FuncFParams implements Unit {
     private static final UnitType type = UnitType.FUNC_F_PARAMS;
     private final ArrayList<FuncFParam> funcFParams = new ArrayList<>();
 
@@ -20,6 +20,10 @@ public class FuncFParams implements Unit{
             }
         }
         return funcFParamsStr.toString();
+    }
+
+    public int getSize() {
+        return funcFParams.size();
     }
 
     @Override

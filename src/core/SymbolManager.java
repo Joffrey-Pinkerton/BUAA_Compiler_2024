@@ -6,49 +6,44 @@ import semantics.Symbol;
 import semantics.SymbolTable;
 
 public class SymbolManager {
-    private int scopeCount;
-    private SymbolTable curTable;
+    private static int scopeCount = 1;
+    private static SymbolTable curTable = new SymbolTable(scopeCount, null);
 
-    public SymbolManager() {
-        this.scopeCount = 1;
-        this.curTable = new SymbolTable(scopeCount, null);
-    }
-
-    public int getScopeId() {
+    public static int getScopeId() {
         return curTable.getScopeId();
     }
 
-    public void startAddingFuncFParams() {
-        this.scopeCount++;
-        this.curTable.setNextTable(new SymbolTable(scopeCount, curTable));
+    public static void startAddingFuncFParams() {
+        scopeCount++;
+        curTable.setNextTable(new SymbolTable(scopeCount, curTable));
         Handler.addSymbolTable();
-        this.curTable = curTable.getNextTable();
+        curTable = curTable.getNextTable();
     }
 
-    public void pushScope() {
-        this.scopeCount++;
+    public static void pushScope() {
+        scopeCount++;
         Handler.addSymbolTable();
         SymbolTable nextTable = curTable.getNextTable();
 
         if (nextTable != null) {
-            this.curTable.setNextTable(null);
-            this.curTable = nextTable;
+            curTable.setNextTable(null);
+            curTable = nextTable;
         } else {
-            this.curTable = new SymbolTable(scopeCount, curTable);
+            curTable = new SymbolTable(scopeCount, curTable);
             Handler.addSymbolTable();
         }
     }
 
-    public void endAddingFuncFParams() {
-        this.scopeCount--;
+    public static void endAddingFuncFParams() {
+        scopeCount--;
         popScope();
     }
 
-    public void popScope() {
-        this.curTable = curTable.getPrevTable();
+    public static void popScope() {
+        curTable = curTable.getPrevTable();
     }
 
-    public void registerSymbol(Symbol symbol, int lineNum) {
+    public static void registerSymbol(Symbol symbol, int lineNum) {
         try {
             if (curTable.exist(symbol.getName())) {
                 throw new RedefinitionException("Redefinition of " + symbol.getName(), lineNum);
@@ -59,7 +54,7 @@ public class SymbolManager {
         Handler.addSymbol(symbol.getScopeId(), symbol);
     }
 
-    public Symbol useSymbol(String name, int lineNum) {
+    public static Symbol useSymbol(String name, int lineNum) {
         Symbol symbol = lookupSymbol(curTable, name);
         try {
             if (symbol == null) {
@@ -70,7 +65,7 @@ public class SymbolManager {
         return symbol;
     }
 
-    private Symbol lookupSymbol(SymbolTable table, String name) {
+    private static Symbol lookupSymbol(SymbolTable table, String name) {
         if (table.exist(name)) {
             return table.getSymbol(name);
         }

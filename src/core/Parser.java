@@ -13,11 +13,9 @@ import java.util.ArrayList;
 
 public class Parser {
     private final Lexer lexer;
-    private final SymbolManager symbolManager;
 
-    public Parser(Lexer lexer, SymbolManager symbolManager) {
+    public Parser(Lexer lexer) {
         this.lexer = lexer;
-        this.symbolManager = symbolManager;
     }
 
     public CompUnit parseCompUnit() {
@@ -106,10 +104,10 @@ public class Parser {
 
         Symbol symbol = isArray ?
                 Symbol.createConstArraySymbol(btype.isInt() ?
-                        SymbolType.CONST_INT_ARRAY : SymbolType.CONST_CHAR_ARRAY, ident, symbolManager.getScopeId(), constExp, constInitVal) :
+                        SymbolType.CONST_INT_ARRAY : SymbolType.CONST_CHAR_ARRAY, ident, SymbolManager.getScopeId(), constExp, constInitVal) :
                 Symbol.createConstVarSymbol(btype.isInt() ? SymbolType.CONST_INT :
-                        SymbolType.CONST_CHAR, ident, symbolManager.getScopeId(), constInitVal);
-        symbolManager.registerSymbol(symbol, lineNum);
+                        SymbolType.CONST_CHAR, ident, SymbolManager.getScopeId(), constInitVal);
+        SymbolManager.registerSymbol(symbol, lineNum);
 
         ConstDef constDef = isArray ? new ConstDef(ident, constExp, constInitVal) : new ConstDef(ident, constInitVal);
         // Handler.addSyntacticUnit(constDef);
@@ -192,9 +190,9 @@ public class Parser {
         VarDef varDef = new VarDef(ident, constExp, initVal);
 
         Symbol symbol = constExp != null ?
-                Symbol.createArraySymbol(bType.isInt() ? SymbolType.INT_ARRAY : SymbolType.CHAR_ARRAY, ident, symbolManager.getScopeId(), constExp, initVal) :
-                Symbol.createVarSymbol(bType.isInt() ? SymbolType.INT : SymbolType.CHAR, ident, symbolManager.getScopeId(), initVal);
-        symbolManager.registerSymbol(symbol, lineNum);
+                Symbol.createArraySymbol(bType.isInt() ? SymbolType.INT_ARRAY : SymbolType.CHAR_ARRAY, ident, SymbolManager.getScopeId(), constExp, initVal) :
+                Symbol.createVarSymbol(bType.isInt() ? SymbolType.INT : SymbolType.CHAR, ident, SymbolManager.getScopeId(), initVal);
+        SymbolManager.registerSymbol(symbol, lineNum);
         // Handler.addSyntacticUnit(varDef);
         return varDef;
     }
@@ -252,15 +250,15 @@ public class Parser {
 
         FuncFParams funcFParams = new FuncFParams(new ArrayList<>());
         if (lexer.lookCurrent(TokenType.INTTK) || lexer.lookCurrent(TokenType.CHARTK)) {
-            symbolManager.startAddingFuncFParams();
+            SymbolManager.startAddingFuncFParams();
             funcFParams = parseFuncFParams();
-            symbolManager.endAddingFuncFParams();
+            SymbolManager.endAddingFuncFParams();
         }
         checkRightParenthesisAndPass();
 
         SymbolType type = funcType.isVoid() ? SymbolType.VOID_FUNC : funcType.isInt() ? SymbolType.INT_FUNC : SymbolType.CHAR_FUNC;
-        Symbol symbol = Symbol.createFuncSymbol(type, funcName, symbolManager.getScopeId(), funcFParams);
-        symbolManager.registerSymbol(symbol, lineNum);
+        Symbol symbol = Symbol.createFuncSymbol(type, funcName, SymbolManager.getScopeId(), funcFParams);
+        SymbolManager.registerSymbol(symbol, lineNum);
 
         Block block = parseBlock(false, funcType.isVoid(), funcType.isInt() || funcType.isChar());
         FuncDef funcDef = new FuncDef(funcType, funcName, funcFParams, block);
@@ -336,16 +334,16 @@ public class Parser {
         FuncFParam funcFParam = new FuncFParam(bType, ident, isArray);
 
         Symbol symbol = isArray ?
-                Symbol.createArraySymbol(bType.isInt() ? SymbolType.INT_ARRAY : SymbolType.CHAR_ARRAY, ident, symbolManager.getScopeId(), null, null) :
-                Symbol.createVarSymbol(bType.isInt() ? SymbolType.INT : SymbolType.CHAR, ident, symbolManager.getScopeId(), null);
-        symbolManager.registerSymbol(symbol, lineNum);
+                Symbol.createArraySymbol(bType.isInt() ? SymbolType.INT_ARRAY : SymbolType.CHAR_ARRAY, ident, SymbolManager.getScopeId(), null, null) :
+                Symbol.createVarSymbol(bType.isInt() ? SymbolType.INT : SymbolType.CHAR, ident, SymbolManager.getScopeId(), null);
+        SymbolManager.registerSymbol(symbol, lineNum);
         // Handler.addSyntacticUnit(funcFParam);
         return funcFParam;
     }
 
     public Block parseBlock(boolean inLoop, boolean checkVoid, boolean checkReturn) {
         // Block → '{' { BlockItem } '}'
-        symbolManager.pushScope();
+        SymbolManager.pushScope();
         lexer.next();
 
         ArrayList<BlockItem> blockItems = new ArrayList<>();
@@ -365,7 +363,7 @@ public class Parser {
             }
         }
         // Handler.addSyntacticUnit(block);
-        symbolManager.popScope();
+        SymbolManager.popScope();
         return block;
     }
 
@@ -519,7 +517,16 @@ public class Parser {
             Handler.restore();
             units.clear();
 
+            String ident = lexer.peek().value();
+            int lineNum = lexer.getLineNum();
             LVal lVal = parseLVal();
+            Symbol symbol = SymbolManager.useSymbol(ident, lineNum);
+            try {
+                if (symbol != null && symbol.isConstType()) {
+                    throw new ImmutableConstantException("Trying to assign to a constant variable", lineNum);
+                }
+            } catch (ImmutableConstantException ignored) {
+            }
             units.add(lVal);
             if (!lexer.lookCurrent(TokenType.ASSIGN)) {
                 throw new RuntimeException("Expect '=', but get " + lexer.peek());
@@ -653,6 +660,8 @@ public class Parser {
 
     public ForStmt parseForStmt() {
         // ForStmt → LVal '=' Exp
+        int lineNum = lexer.getLineNum();
+        String ident = lexer.peek().value();
         LVal lVal = parseLVal();
         if (!lexer.lookCurrent(TokenType.ASSIGN)) {
             throw new RuntimeException("Expect '=', but get " + lexer.peek());
@@ -682,11 +691,9 @@ public class Parser {
 
     public LVal parseLVal() {
         // LVal → Ident ['[' Exp ']'] // k
-        int lineNum = lexer.getLineNum();
         String ident = lexer.peek().value();
-        lexer.next();
 
-        symbolManager.useSymbol(ident, lineNum);
+        lexer.next();
 
         Exp exp = null;
         if (lexer.lookCurrent(TokenType.LBRACK)) {
@@ -765,17 +772,27 @@ public class Parser {
         if (lexer.lookCurrent(TokenType.IDENFR) && lexer.lookAhead(TokenType.LPARENT)) {
             int lineNum = lexer.getLineNum();
             String ident = lexer.peek().value();
-
-            Symbol symbol = symbolManager.useSymbol(ident, lineNum);
-
+            Symbol symbol = SymbolManager.useSymbol(ident, lineNum);
 
             lexer.next();
             lexer.next();
+
             FuncRParams funcRParams = null;
             if (lexer.lookCurrent(TokenType.PLUS) || lexer.lookCurrent(TokenType.MINU) || lexer.lookCurrent(TokenType.NOT) ||
                     lexer.lookCurrent(TokenType.INTCON) || lexer.lookCurrent(TokenType.CHRCON) || lexer.lookCurrent(TokenType.LPARENT) ||
                     lexer.lookCurrent(TokenType.IDENFR)) {
                 funcRParams = parseFuncRParams();
+            }
+            int funcRParamCount = funcRParams == null ? 0 : funcRParams.getSize();
+            int funcFParamCount = symbol == null ? funcRParamCount : symbol.getFuncFParams().getSize();
+            try {
+                if (symbol == null || funcRParamCount != funcFParamCount) {
+                    throw new ArgumentCountMismatchException("The number of arguments does not match the number of parameters", lineNum);
+                }
+                if (funcRParams != null && !funcRParams.checkType(symbol.getFuncFParams())) {
+                    throw new ArgumentTypeMismatchException("The type of arguments does not match the type of parameters", lineNum);
+                }
+            } catch (ArgumentCountMismatchException | ArgumentTypeMismatchException ignored) {
             }
             checkRightParenthesisAndPass();
             UnaryExp unaryExp = new UnaryExp(ident, funcRParams);
@@ -793,6 +810,23 @@ public class Parser {
             // Handler.addSyntacticUnit(unaryExp);
             return unaryExp;
         }
+    }
+
+    public FuncRParams parseFuncRParams() {
+        // FuncRParams → Exp { ',' Exp }
+        ArrayList<Exp> exps = new ArrayList<>();
+        ArrayList<SymbolType> types = new ArrayList<>();
+
+        types.add(lexer.GuessExpSymbolType());
+        exps.add(parseExp());
+        while (lexer.lookCurrent(TokenType.COMMA)) {
+            lexer.next();
+            types.add(lexer.GuessExpSymbolType());
+            exps.add(parseExp());
+        }
+        FuncRParams funcRParams = new FuncRParams(exps, types);
+        // Handler.addSyntacticUnit(funcRParams);
+        return funcRParams;
     }
 
     private void checkRightParenthesisAndPass() {
@@ -815,19 +849,6 @@ public class Parser {
         } else {
             throw new RuntimeException("Expect '+', '-', or '!', but get " + lexer.peek());
         }
-    }
-
-    public FuncRParams parseFuncRParams() {
-        // FuncRParams → Exp { ',' Exp }
-        ArrayList<Exp> exps = new ArrayList<>();
-        exps.add(parseExp());
-        while (lexer.lookCurrent(TokenType.COMMA)) {
-            lexer.next();
-            exps.add(parseExp());
-        }
-        FuncRParams funcRParams = new FuncRParams(exps);
-        // Handler.addSyntacticUnit(funcRParams);
-        return funcRParams;
     }
 
     public MulExp parseMulExp() {

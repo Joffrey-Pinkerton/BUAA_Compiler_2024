@@ -100,6 +100,22 @@ public final class Symbol {
         return new Symbol(type, name, scopeId, arraySize, initVal);
     }
 
+    public boolean isConstType() {
+        return type.equals(SymbolType.CONST_INT) || type.equals(SymbolType.CONST_CHAR) || type.equals(SymbolType.CONST_INT_ARRAY) || type.equals(SymbolType.CONST_CHAR_ARRAY);
+    }
+
+    public boolean isCharArr() {
+        return type.equals(SymbolType.CHAR_ARRAY) || type.equals(SymbolType.CONST_CHAR_ARRAY);
+    }
+
+    public boolean isIntArr() {
+        return type.equals(SymbolType.INT_ARRAY) || type.equals(SymbolType.CONST_INT_ARRAY);
+    }
+
+    public boolean isFunc() {
+        return type.equals(SymbolType.VOID_FUNC) || type.equals(SymbolType.CHAR_FUNC) || type.equals(SymbolType.INT_FUNC);
+    }
+
     @Override
 
     public String toString() {
@@ -116,6 +132,10 @@ public final class Symbol {
 
     public int getScopeId() {
         return scopeId;
+    }
+
+    public FuncFParams getFuncFParams() {
+        return funcFParams;
     }
 }
 

@@ -15,8 +15,7 @@ public class Compiler {
             byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
             String content = new String(fileBytes);
             Lexer lexer = new Lexer(content);
-            SymbolManager symbolManager = new SymbolManager();
-            Parser parser = new Parser(lexer, symbolManager);
+            Parser parser = new Parser(lexer);
             parser.parseCompUnit();
             Handler.print();
         } catch (IOException e) {

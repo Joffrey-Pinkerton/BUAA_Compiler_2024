@@ -1,7 +1,9 @@
 package syntax;
 
+import semantics.SymbolType;
+
 // Exp → AddExp
-public class Exp implements Unit{
+public class Exp implements Unit {
     private static final UnitType type = UnitType.EXP;
     private final AddExp addExp;
 

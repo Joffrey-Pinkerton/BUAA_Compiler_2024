@@ -3,6 +3,8 @@ package core;
 import exception.IllegalTokenException;
 import lexicon.Token;
 import lexicon.TokenType;
+import semantics.Symbol;
+import semantics.SymbolType;
 
 public class Lexer {
     private final String source;
@@ -230,7 +232,7 @@ public class Lexer {
         lineIndex = line;
         curToken = token;
 
-        Handler.popSyntacticUnit();
+        // Handler.popSyntacticUnit();
 
         return nextToken.tokenType().equals(type);
     }
@@ -248,11 +250,48 @@ public class Lexer {
         lineIndex = line;
         curToken = token;
 
-        Handler.popSyntacticUnit();
-        Handler.popSyntacticUnit();
+        // Handler.popSyntacticUnit();
+        // Handler.popSyntacticUnit();
 
         return next2Token.tokenType().equals(type);
     }
+
+    public SymbolType GuessExpSymbolType() {
+        int pos = curPos;
+        int line = lineIndex;
+        Token originalToken = curToken;
+
+        while (!lookCurrent(TokenType.IDENFR) && !lookCurrent(TokenType.INTCON) && !lookCurrent(TokenType.CHRCON)) {
+            next();
+        }
+
+        Token token = curToken;
+        SymbolType symbolType = null;
+        if (token.tokenType().equals(TokenType.INTCON)) {
+            symbolType = SymbolType.INT;
+        } else if (token.tokenType().equals(TokenType.CHRCON)) {
+            symbolType = SymbolType.CHAR;
+        } else {
+            Symbol symbol = SymbolManager.useSymbol(token.value(), token.lineNum());
+            if (symbol.isCharArr() && lookAhead(TokenType.LBRACK)) {
+                symbolType = SymbolType.CHAR;
+            } else if (symbol.isIntArr() && lookAhead(TokenType.LBRACK)) {
+                symbolType = SymbolType.INT;
+            } else if (symbol.isFunc()) {
+                symbolType = symbol.getType().equals(SymbolType.INT_FUNC) ? SymbolType.INT : SymbolType.CHAR;
+            } else {
+                symbolType = symbol.getType();
+            }
+        }
+        curPos = pos;
+        lineIndex = line;
+        curToken = originalToken;
+
+        // Handler.popSyntacticUnit();
+        // Handler.popSyntacticUnit();
+        return symbolType;
+    }
+
 
     public void save() {
         savePos = curPos;
