@@ -26,4 +26,8 @@ public class FuncFParams implements Unit{
     public UnitType getType() {
         return type;
     }
+
+    public ArrayList<FuncFParam> getParams() {
+        return funcFParams;
+    }
 }

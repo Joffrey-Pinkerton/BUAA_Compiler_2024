@@ -4,7 +4,6 @@ import exception.RedefinitionException;
 import exception.UndefinedIdentifierException;
 import semantics.Symbol;
 import semantics.SymbolTable;
-import semantics.SymbolType;
 
 public class SymbolManager {
     private int scopeCount;
@@ -19,12 +18,33 @@ public class SymbolManager {
         return curTable.getScopeId();
     }
 
-    public void enterBlock() {
+    public void startAddingFuncFParams() {
         this.scopeCount++;
-        this.curTable = new SymbolTable(scopeCount, curTable);
+        this.curTable.setNextTable(new SymbolTable(scopeCount, curTable));
+        Handler.addSymbolTable();
+        this.curTable = curTable.getNextTable();
     }
 
-    public void exitBlock() {
+    public void pushScope() {
+        this.scopeCount++;
+        Handler.addSymbolTable();
+        SymbolTable nextTable = curTable.getNextTable();
+
+        if (nextTable != null) {
+            this.curTable.setNextTable(null);
+            this.curTable = nextTable;
+        } else {
+            this.curTable = new SymbolTable(scopeCount, curTable);
+            Handler.addSymbolTable();
+        }
+    }
+
+    public void endAddingFuncFParams() {
+        this.scopeCount--;
+        popScope();
+    }
+
+    public void popScope() {
         this.curTable = curTable.getPrevTable();
     }
 
@@ -34,9 +54,9 @@ public class SymbolManager {
                 throw new RedefinitionException("Redefinition of " + symbol.getName(), lineNum);
             }
         } catch (RedefinitionException ignored) {
-
         }
         curTable.register(symbol.getName(), symbol);
+        Handler.addSymbol(symbol.getScopeId(), symbol);
     }
 
     public Symbol useSymbol(String name, int lineNum) {

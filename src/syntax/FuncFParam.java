@@ -21,4 +21,16 @@ public class FuncFParam implements Unit {
     public UnitType getType() {
         return type;
     }
+
+    public boolean isArray() {
+        return isArray;
+    }
+
+    public BType getbType() {
+        return bType;
+    }
+
+    public String getIdent() {
+        return ident;
+    }
 }

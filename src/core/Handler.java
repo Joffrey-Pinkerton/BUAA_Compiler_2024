@@ -2,6 +2,7 @@ package core;
 
 import exception.ErrorInfo;
 import lexicon.Token;
+import semantics.Symbol;
 import syntax.Unit;
 
 import java.io.BufferedWriter;
@@ -13,9 +14,23 @@ import java.util.Stack;
 public class Handler {
     private static final Stack<Unit> unitStack = new Stack<>();
     private static final ArrayList<ErrorInfo> errorList = new ArrayList<>();
+    private static final ArrayList<ArrayList<Symbol>> symbolLists = new ArrayList<>() {
+        {
+            add(new ArrayList<>());
+        }
+    };
+
 
     private static final Stack<Unit> saveUnitStack = new Stack<>();
     private static final ArrayList<ErrorInfo> saveErrorList = new ArrayList<>();
+
+    public static void addSymbolTable() {
+        symbolLists.add(new ArrayList<>());
+    }
+
+    public static void addSymbol(int scopeId, Symbol symbol) {
+         symbolLists.get(scopeId - 1).add(symbol);
+    }
 
     public static void addSyntacticUnit(Unit unit) {
         unitStack.push(unit);
@@ -40,11 +55,17 @@ public class Handler {
 
     private static void printInfos() {
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("parser.txt"));
+            BufferedWriter bw = new BufferedWriter(new FileWriter("symbol.txt"));
 
-            for (Unit unit : unitStack) {
-                String output = unit instanceof Token ? (((Token) unit).tokenType() + " " + unit) : unit.getType().toString();
-                bw.write(output + "\n");
+//            for (Unit unit : unitStack) {
+//                String output = unit instanceof Token ? (((Token) unit).tokenType() + " " + unit) : unit.getType().toString();
+//                bw.write(output + "\n");
+//            }
+
+            for (ArrayList<Symbol> symbolList : symbolLists) {
+                for (Symbol symbol : symbolList) {
+                    bw.write(symbol + "\n");
+                }
             }
             bw.flush();
             bw.close();

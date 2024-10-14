@@ -9,7 +9,6 @@ import syntax.*;
 import syntax.Character;
 import syntax.Number;
 
-import javax.management.relation.RelationTypeNotFoundException;
 import java.util.ArrayList;
 
 public class Parser {
@@ -253,10 +252,13 @@ public class Parser {
 
         FuncFParams funcFParams = new FuncFParams(new ArrayList<>());
         if (lexer.lookCurrent(TokenType.INTTK) || lexer.lookCurrent(TokenType.CHARTK)) {
+            symbolManager.startAddingFuncFParams();
             funcFParams = parseFuncFParams();
+            symbolManager.endAddingFuncFParams();
         }
         checkRightParenthesisAndPass();
-        Block block = parseBlock(false, null, true);
+
+        Block block = parseBlock(false, funcType.isVoid(), funcType.isInt() || funcType.isChar());
         FuncDef funcDef = new FuncDef(funcType, funcName, funcFParams, block);
 
         SymbolType type = funcType.isVoid() ? SymbolType.VOID_FUNC : funcType.isInt() ? SymbolType.INT_FUNC : SymbolType.CHAR_FUNC;
@@ -293,7 +295,7 @@ public class Parser {
         }
         lexer.next();
         checkRightParenthesisAndPass();
-        Block block = parseBlock(false, "int", true);
+        Block block = parseBlock(false, false, true);
 
         MainFuncDef mainFuncDef = new MainFuncDef(block);
         // Handler.addSyntacticUnit(mainFuncDef);
@@ -321,6 +323,7 @@ public class Parser {
         if (!lexer.lookCurrent(TokenType.IDENFR)) {
             throw new RuntimeException("Expect an identifier, but get " + lexer.peek());
         }
+        int lineNum = lexer.getLineNum();
         String ident = lexer.peek().value();
         lexer.next();
 
@@ -331,22 +334,23 @@ public class Parser {
             checkRightBracketAndPass();
         }
         FuncFParam funcFParam = new FuncFParam(bType, ident, isArray);
+
+        Symbol symbol = isArray ?
+                Symbol.createArraySymbol(bType.isInt() ? SymbolType.INT_ARRAY : SymbolType.CHAR_ARRAY, ident, symbolManager.getScopeId(), null, null) :
+                Symbol.createVarSymbol(bType.isInt() ? SymbolType.INT : SymbolType.CHAR, ident, symbolManager.getScopeId(), null);
+        symbolManager.registerSymbol(symbol, lineNum);
         // Handler.addSyntacticUnit(funcFParam);
         return funcFParam;
     }
 
-    public Block parseBlock(boolean inLoop, String funcType, boolean checkReturn) {
+    public Block parseBlock(boolean inLoop, boolean checkVoid, boolean checkReturn) {
         // Block → '{' { BlockItem } '}'
-        if (!lexer.lookCurrent(TokenType.LBRACE)) {
-            throw new RuntimeException("Expect '{', but get " + lexer.peek());
-        }
-        symbolManager.enterBlock();
-
+        symbolManager.pushScope();
         lexer.next();
 
         ArrayList<BlockItem> blockItems = new ArrayList<>();
         while (!lexer.lookCurrent(TokenType.RBRACE)) {
-            blockItems.add(parseBlockItem(inLoop, funcType));
+            blockItems.add(parseBlockItem(inLoop, checkVoid));
         }
         int lineNum = lexer.getLineNum();
         lexer.next();
@@ -361,22 +365,22 @@ public class Parser {
             }
         }
         // Handler.addSyntacticUnit(block);
-        symbolManager.exitBlock();
+        symbolManager.popScope();
         return block;
     }
 
-    public BlockItem parseBlockItem(boolean inLoop, String funcType) {
+    public BlockItem parseBlockItem(boolean inLoop, boolean checkVoid) {
         // BlockItem → Decl | Stmt
         if (lexer.lookCurrent(TokenType.CONSTTK) || (lexer.lookCurrent(TokenType.INTTK) || lexer.lookCurrent(TokenType.CHARTK))) {
             Decl decl = parseDecl();
             return new BlockItem(decl);
         } else {
-            Stmt stmt = parseStmt(inLoop, funcType);
+            Stmt stmt = parseStmt(inLoop, checkVoid);
             return new BlockItem(stmt);
         }
     }
 
-    private Stmt parseStmtIf(boolean inLoop, String funcType) {
+    private Stmt parseStmtIf(boolean inLoop, boolean checkVoid) {
         ArrayList<Unit> units = new ArrayList<>();
         lexer.next();
         if (!lexer.lookCurrent(TokenType.LPARENT)) {
@@ -386,12 +390,12 @@ public class Parser {
         Cond cond = parseCond();
         units.add(cond);
         checkRightParenthesisAndPass();
-        Stmt thenStmt = parseStmt(inLoop, funcType);
+        Stmt thenStmt = parseStmt(inLoop, checkVoid);
         units.add(thenStmt);
 
         if (lexer.lookCurrent(TokenType.ELSETK)) {
             lexer.next();
-            Stmt elseStmt = parseStmt(inLoop, funcType);
+            Stmt elseStmt = parseStmt(inLoop, checkVoid);
             units.add(elseStmt);
         }
         Stmt stmt = new Stmt(StmtType.IF, units);
@@ -399,7 +403,7 @@ public class Parser {
         return stmt;
     }
 
-    private Stmt parseStmtFor(String funcType) {
+    private Stmt parseStmtFor(boolean checkVoid) {
         ArrayList<Unit> units = new ArrayList<>();
         lexer.next();
         if (!lexer.lookCurrent(TokenType.LPARENT)) {
@@ -439,7 +443,7 @@ public class Parser {
             units.add(forStmt);
             checkRightParenthesisAndPass();
         }
-        Stmt stmt = parseStmt(true, funcType);
+        Stmt stmt = parseStmt(true, checkVoid);
         units.add(stmt);
         Stmt forStmt = new Stmt(StmtType.FOR, units);
         // Handler.addSyntacticUnit(forStmt);
@@ -544,8 +548,8 @@ public class Parser {
     }
 
 
-    private Stmt parseStmtBlock(boolean inLoop, String funcType) {
-        Block block = parseBlock(inLoop, funcType, false);
+    private Stmt parseStmtBlock(boolean inLoop, boolean checkVoid) {
+        Block block = parseBlock(inLoop, checkVoid, false);
         Stmt stmt = new Stmt(StmtType.BLOCK, new ArrayList<>() {{
             add(block);
         }});
@@ -553,7 +557,7 @@ public class Parser {
         return stmt;
     }
 
-    private Stmt parseStmtReturn(String funcType) {
+    private Stmt parseStmtReturn(boolean checkVoid) {
         int lineNum = lexer.getLineNum();
         lexer.next();
         if (lexer.lookCurrent(TokenType.SEMICN)) {
@@ -563,7 +567,7 @@ public class Parser {
             return stmt;
         } else {
             try {
-                if (funcType.equals("void")) {
+                if (checkVoid) {
                     throw new ReturnInVoidFunctionException("Return statement in void function", lineNum);
                 }
             } catch (ReturnInVoidFunctionException ignored) {
@@ -623,7 +627,7 @@ public class Parser {
     }
 
 
-    public Stmt parseStmt(boolean inLoop, String funcType) {
+    public Stmt parseStmt(boolean inLoop, boolean checkVoid) {
         //ASSIGN          //Stmt → LVal '=' Exp ';' // i
         //EMPTY+EXPR       //        | [Exp] ';' // i
         //BLOCK           //        | Block
@@ -635,12 +639,12 @@ public class Parser {
         //GETCHAR         //        | LVal '=' 'getchar''('')'';' // i j
         //PRINTF          //        | 'printf''('StringConst {','Exp}')'';' // i j
         return switch (lexer.peek().tokenType()) {
-            case LBRACE -> parseStmtBlock(inLoop, funcType); // BLOCK
-            case IFTK -> parseStmtIf(inLoop, funcType); // IF
-            case FORTK -> parseStmtFor(funcType); // FOR
+            case LBRACE -> parseStmtBlock(inLoop, checkVoid); // BLOCK
+            case IFTK -> parseStmtIf(inLoop, checkVoid); // IF
+            case FORTK -> parseStmtFor(checkVoid); // FOR
             case BREAKTK -> parseStmtBreak(inLoop); // BREAK
             case CONTINUETK -> parseStmtContinue(inLoop); // CONTINUE
-            case RETURNTK -> parseStmtReturn(funcType); // RETURN
+            case RETURNTK -> parseStmtReturn(checkVoid); // RETURN
             case PRINTFTK -> parseStmtPrintf(); // PRINTF
             case SEMICN -> parseStmtEmpty(); // EMPTY
             default -> parseStmtOther(); // ASSIGN? EXPR? GETINT? GETCHAR?
