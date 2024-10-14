@@ -505,10 +505,18 @@ public class Parser {
             lexer.save();
             Handler.save();
             units.add(parseExp());// Possible Exception Here
-            if (!lexer.lookCurrent(TokenType.SEMICN)) {
-                throw new MissingSemicolonException("Expect ';', but get " + lexer.peek(), lexer.getLastToken().lineNum());
+            try {
+                if (!lexer.lookCurrent(TokenType.SEMICN) && !TokenType.isOperator(lexer.peek().value())) { // STILL EXPR!!!
+                    throw new MissingSemicolonException("Expect ';', but get " + lexer.peek(), lexer.getLastToken().lineNum());
+                }
+            } catch (MissingSemicolonException ignored) {
             }
-            lexer.next();
+            if (lexer.lookCurrent(TokenType.ASSIGN)) {
+                throw new MissingSemicolonException("Expect ';', but get '='", lexer.getLastToken().lineNum());
+            }
+            if(lexer.lookCurrent(TokenType.SEMICN)){
+                lexer.next();
+            }
             Stmt stmt = new Stmt(StmtType.EXPR, units);
             // Handler.addSyntacticUnit(stmt);
             return stmt;
