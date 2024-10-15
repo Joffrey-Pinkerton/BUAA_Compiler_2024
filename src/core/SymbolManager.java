@@ -47,11 +47,12 @@ public class SymbolManager {
         try {
             if (curTable.exist(symbol.getName())) {
                 throw new RedefinitionException("Redefinition of " + symbol.getName(), lineNum);
+            } else {
+                curTable.register(symbol.getName(), symbol);
+                Handler.addSymbol(symbol.getScopeId(), symbol);
             }
         } catch (RedefinitionException ignored) {
         }
-        curTable.register(symbol.getName(), symbol);
-        Handler.addSymbol(symbol.getScopeId(), symbol);
     }
 
     public static Symbol useSymbol(String name, int lineNum) {

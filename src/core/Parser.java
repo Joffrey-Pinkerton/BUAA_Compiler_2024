@@ -518,6 +518,7 @@ public class Parser {
             if (lexer.lookCurrent(TokenType.SEMICN)) {
                 lexer.next();
             }
+
             Stmt stmt = new Stmt(StmtType.EXPR, units);
             // Handler.addSyntacticUnit(stmt);
             return stmt;
@@ -752,7 +753,10 @@ public class Parser {
             // Handler.addSyntacticUnit(primaryExp);
             return primaryExp;
         } else {
+            int lineNum = lexer.getLineNum();
             LVal lVal = parseLVal();
+            SymbolManager.useSymbol(lVal.getIdent(), lineNum);
+
             PrimaryExp primaryExp = new PrimaryExp(lVal);
             // Handler.addSyntacticUnit(primaryExp);
             return primaryExp;
