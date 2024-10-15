@@ -506,7 +506,8 @@ public class Parser {
             Handler.save();
             units.add(parseExp());// Possible Exception Here
             try {
-                if (!lexer.lookCurrent(TokenType.SEMICN) && !TokenType.isOperator(lexer.peek().value())) { // STILL EXPR!!!
+                if (!lexer.lookCurrent(TokenType.SEMICN) && (TokenType.isReservedWord(lexer.peek().value())) ||
+                        lexer.lookCurrent(TokenType.IDENFR) || lexer.lookCurrent(TokenType.LPARENT) || lexer.lookCurrent(TokenType.LBRACE)) { // STILL EXPR!!!
                     throw new MissingSemicolonException("Expect ';', but get " + lexer.peek(), lexer.getLastToken().lineNum());
                 }
             } catch (MissingSemicolonException ignored) {
@@ -514,7 +515,7 @@ public class Parser {
             if (lexer.lookCurrent(TokenType.ASSIGN)) {
                 throw new MissingSemicolonException("Expect ';', but get '='", lexer.getLastToken().lineNum());
             }
-            if(lexer.lookCurrent(TokenType.SEMICN)){
+            if (lexer.lookCurrent(TokenType.SEMICN)) {
                 lexer.next();
             }
             Stmt stmt = new Stmt(StmtType.EXPR, units);
@@ -570,9 +571,14 @@ public class Parser {
             Stmt stmt = new Stmt(StmtType.RETURN);
             // Handler.addSyntacticUnit(stmt);
             return stmt;
+        } else if (checkVoid && lexer.getLineNum() > lineNum) {
+            checkSemicolonAndPass();
+            Stmt stmt = new Stmt(StmtType.RETURN);
+            // Handler.addSyntacticUnit(stmt);
+            return stmt;
         } else {
             try {
-                if (checkVoid) {
+                if (checkVoid && lexer.getLineNum() == lineNum) {
                     throw new ReturnInVoidFunctionException("Return statement in void function", lineNum);
                 }
             } catch (ReturnInVoidFunctionException ignored) {

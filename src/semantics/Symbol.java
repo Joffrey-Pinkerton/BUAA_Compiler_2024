@@ -5,6 +5,8 @@ import syntax.ConstInitVal;
 import syntax.FuncFParams;
 import syntax.InitVal;
 
+import java.util.ArrayList;
+
 public final class Symbol {
     private final SymbolType type;
     private final String name;
@@ -19,7 +21,7 @@ public final class Symbol {
         this.name = name;
         this.scopeId = scopeId;
         this.arraySize = null;
-        this.funcFParams = null;
+        this.funcFParams = new FuncFParams(new ArrayList<>());
         this.constInitVal = constInitVal;
         this.initVal = null;
     }
@@ -29,7 +31,7 @@ public final class Symbol {
         this.name = name;
         this.scopeId = scopeId;
         this.arraySize = null;
-        this.funcFParams = null;
+        this.funcFParams = new FuncFParams(new ArrayList<>());
         this.constInitVal = null;
         this.initVal = initVal;
     }
@@ -39,7 +41,7 @@ public final class Symbol {
         this.name = name;
         this.scopeId = scopeId;
         this.arraySize = arraySize;
-        this.funcFParams = null;
+        this.funcFParams = new FuncFParams(new ArrayList<>());
         this.constInitVal = constInitVal;
         this.initVal = null;
     }
@@ -49,7 +51,7 @@ public final class Symbol {
         this.name = name;
         this.scopeId = scopeId;
         this.arraySize = arraySize;
-        this.funcFParams = null;
+        this.funcFParams = new FuncFParams(new ArrayList<>());
         this.constInitVal = null;
         this.initVal = initVal;
     }
